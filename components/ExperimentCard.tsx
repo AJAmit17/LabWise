@@ -15,7 +15,7 @@ const ExperimentCard = ({ experiment }: { experiment: Experiment }) => {
     return (
         <Card style={styles.card}>
             <Card.Content>
-                <Title style={styles.title}>Experiment Details</Title>
+                <Title style={styles.title}>{experiment.ExpName}</Title>
                 <Paragraph style={styles.paragraph}>Year: {experiment.year}</Paragraph>
                 <Paragraph style={styles.paragraph}>Academic year: {experiment.aceYear}</Paragraph>
                 <Paragraph style={styles.paragraph}>Branch: {experiment.Branch}</Paragraph>

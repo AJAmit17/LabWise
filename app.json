@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "ccapp",
-    "slug": "ccapp",
+    "name": "LabWise",
+    "slug": "LabWise",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -15,7 +15,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.ajamit_17.LabWise"
     },
     "web": {
       "bundler": "metro",
@@ -36,6 +37,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "136713de-5175-4d87-b9f5-67f9118111f4"
+      }
     }
   }
 }

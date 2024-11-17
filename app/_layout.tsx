@@ -1,18 +1,107 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { ClerkProvider, ClerkLoaded, useAuth } from '@clerk/clerk-expo';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
+import { useEffect, useState } from 'react';
+import { View, ActivityIndicator } from 'react-native';
+import { Provider as PaperProvider, MD3DarkTheme, MD3LightTheme } from 'react-native-paper';
+import * as SecureStore from 'expo-secure-store';
+import { useColorScheme } from 'react-native';
 
-import { useColorScheme } from '@/hooks/useColorScheme';
+const tokenCache = {
+  async getToken(key: string) {
+    try {
+      return SecureStore.getItemAsync(key);
+    } catch (err) {
+      return null;
+    }
+  },
+  async saveToken(key: string, value: string) {
+    try {
+      return SecureStore.setItemAsync(key, value);
+    } catch (err) {
+      return;
+    }
+  },
+};
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
+function LoadingScreen() {
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <ActivityIndicator size="large" color="#6200ee" />
+    </View>
+  );
+}
+
+function InitialLayout() {
+  const { isLoaded, isSignedIn } = useAuth();
+  const segments = useSegments();
+  const router = useRouter();
+  const colorScheme = useColorScheme();
+  const [isDarkMode, setIsDarkMode] = useState(colorScheme === 'dark');
+
+  const theme = isDarkMode ? MD3DarkTheme : MD3LightTheme;
+  const navigationTheme = isDarkMode ? DarkTheme : DefaultTheme;
+
+  useEffect(() => {
+    if (!isLoaded) return;
+
+    const inTabsGroup = segments[0] === '(tabs)';
+    const isExperimentRoute = segments[0] === 'experiment';
+    const isCommunityRoute = segments[0] === 'community';
+
+    if (isSignedIn && !inTabsGroup && !isExperimentRoute && !isCommunityRoute) {
+      router.replace('/(tabs)');
+    } else if (!isSignedIn) {
+      router.replace('/sign-in');
+    }
+  }, [isSignedIn, segments]);
+
+  if (!isLoaded) return <LoadingScreen />;
+
+  return (
+    <PaperProvider theme={theme}>
+      <ThemeProvider value={navigationTheme}>
+        <Stack
+          screenOptions={{
+            headerStyle: {
+              backgroundColor: theme.colors.surface,
+            },
+            headerTintColor: theme.colors.primary,
+            headerShadowVisible: false,
+            animation: 'slide_from_right',
+          }}
+        >
+          <Stack.Screen name="sign-in" options={{ headerShown: false }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="experiment/[id]"
+            options={{
+              presentation: 'modal',
+              headerShown: true,
+              headerTitle: 'Experiment Details',
+            }}
+          />
+          <Stack.Screen
+            name="community/[id]"
+            options={{
+              presentation: 'modal',
+              headerShown: true,
+              headerTitle: 'Community Profile',
+            }}
+          />
+          <Stack.Screen name="+not-found" options={{ headerShown: false }} />
+        </Stack>
+        <StatusBar style={isDarkMode ? 'light' : 'dark'} />
+      </ThemeProvider>
+    </PaperProvider>
+  );
+}
 
 export default function RootLayout() {
-  // const colorScheme = useColorScheme();
+  const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
@@ -23,25 +112,18 @@ export default function RootLayout() {
     }
   }, [loaded]);
 
-  if (!loaded) {
-    return null;
+  if (!publishableKey) {
+    throw new Error('Add EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY to your .env file');
   }
 
+  if (!loaded) return <LoadingScreen />;
+
   return (
-    <ThemeProvider value={
-      // colorScheme === 'dark' ? DarkTheme : DefaultTheme
-      DefaultTheme
-    }>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="experiment/[id]"
-          options={{}}
-        />
-        <Stack.Screen name="community/[id]" options={{}} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <ClerkProvider
+      publishableKey={publishableKey}
+      tokenCache={tokenCache}
+    >
+      <InitialLayout />
+    </ClerkProvider>
   );
 }

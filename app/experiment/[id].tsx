@@ -5,6 +5,7 @@ import { View, StyleSheet, ScrollView, Dimensions, Text } from "react-native";
 import { ActivityIndicator, Card, Title, Paragraph, Button, Snackbar } from 'react-native-paper';
 import Markdown from 'react-native-markdown-display';
 import { Experiment } from "@/types";
+import { ThemedText } from "@/components/ThemedText";
 
 const ExperimentDetail = () => {
   const { id } = useLocalSearchParams();
