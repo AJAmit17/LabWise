@@ -1,10 +1,10 @@
 import { PaperProvider, adaptNavigationTheme, IconButton } from 'react-native-paper';
 import { DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { Tabs } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { StyleSheet, useColorScheme, View } from 'react-native';
 import { useState, useCallback } from 'react';
-import { lightTheme, darkTheme } from '@/theme';
+import { lightTheme, darkTheme } from '../../theme';
 import { useAuth } from "@clerk/clerk-expo";
 
 export default function TabLayout() {
@@ -32,9 +32,9 @@ export default function TabLayout() {
 
   const ThemeIcon = useCallback(() => (
     <IconButton
-      icon={isDarkTheme ? 'white-balance-sunny' : 'moon-waning-crescent'} // Updated icon names
+      icon={isDarkTheme ? 'white-balance-sunny' : 'moon-waning-crescent'}
       size={24}
-      iconColor={theme.colors.primary} // Make icon color visible
+      iconColor={theme.colors.primary}
       onPress={toggleTheme}
       style={[
         styles.themeToggle,
@@ -110,13 +110,10 @@ export default function TabLayout() {
         <Tabs.Screen
           name="three"
           options={{
-            title: "Community",
-            tabBarIcon: ({ color, focused }) => (
-              <Ionicons
-                name={focused ? "people" : "people-outline"}
-                size={24}
-                color={color}
-              />
+            title: "Time Table 5th Sem",
+            headerTitle: "CSE-DS Class Time Table",
+            tabBarIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="calendar" size={size} color={color} />
             ),
           }}
         />

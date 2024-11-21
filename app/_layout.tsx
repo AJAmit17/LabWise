@@ -9,6 +9,12 @@ import { View, ActivityIndicator } from 'react-native';
 import { Provider as PaperProvider, MD3DarkTheme, MD3LightTheme } from 'react-native-paper';
 import * as SecureStore from 'expo-secure-store';
 import { useColorScheme } from 'react-native';
+import React from 'react';
+import { NotificationProvider } from '@/context/NotificationContext';
+import { ScheduleProvider } from '@/context/ScheduleContext';
+import { en, registerTranslation } from 'react-native-paper-dates';
+
+registerTranslation('en', en);
 
 const tokenCache = {
   async getToken(key: string) {
@@ -50,9 +56,8 @@ function InitialLayout() {
 
     const inTabsGroup = segments[0] === '(tabs)';
     const isExperimentRoute = segments[0] === 'experiment';
-    const isCommunityRoute = segments[0] === 'community';
 
-    if (isSignedIn && !inTabsGroup && !isExperimentRoute && !isCommunityRoute) {
+    if (isSignedIn && !inTabsGroup && !isExperimentRoute) {
       router.replace('/(tabs)');
     } else if (!isSignedIn) {
       router.replace('/sign-in');
@@ -63,39 +68,35 @@ function InitialLayout() {
 
   return (
     <PaperProvider theme={theme}>
-      <ThemeProvider value={navigationTheme}>
-        <Stack
-          screenOptions={{
-            headerStyle: {
-              backgroundColor: theme.colors.surface,
-            },
-            headerTintColor: theme.colors.primary,
-            headerShadowVisible: false,
-            animation: 'slide_from_right',
-          }}
-        >
-          <Stack.Screen name="sign-in" options={{ headerShown: false }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="experiment/[id]"
-            options={{
-              presentation: 'modal',
-              headerShown: true,
-              headerTitle: 'Experiment Details',
-            }}
-          />
-          <Stack.Screen
-            name="community/[id]"
-            options={{
-              presentation: 'modal',
-              headerShown: true,
-              headerTitle: 'Community Profile',
-            }}
-          />
-          <Stack.Screen name="+not-found" options={{ headerShown: false }} />
-        </Stack>
-        <StatusBar style={isDarkMode ? 'light' : 'dark'} />
-      </ThemeProvider>
+      <NotificationProvider>
+        <ScheduleProvider>
+          <ThemeProvider value={navigationTheme}>
+            <Stack
+              screenOptions={{
+                headerStyle: {
+                  backgroundColor: theme.colors.surface,
+                },
+                headerTintColor: theme.colors.primary,
+                headerShadowVisible: false,
+                animation: 'slide_from_right',
+              }}
+            >
+              <Stack.Screen name="sign-in" options={{ headerShown: false }} />
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen
+                name="experiment/[id]"
+                options={{
+                  presentation: 'modal',
+                  headerShown: true,
+                  headerTitle: 'Experiment Details',
+                }}
+              />
+              <Stack.Screen name="+not-found" options={{ headerShown: false }} />
+            </Stack>
+            <StatusBar style={isDarkMode ? 'light' : 'dark'} />
+          </ThemeProvider>
+        </ScheduleProvider>
+      </NotificationProvider>
     </PaperProvider>
   );
 }
@@ -123,7 +124,9 @@ export default function RootLayout() {
       publishableKey={publishableKey}
       tokenCache={tokenCache}
     >
-      <InitialLayout />
+      <ClerkLoaded>
+        <InitialLayout />
+      </ClerkLoaded>
     </ClerkProvider>
   );
 }

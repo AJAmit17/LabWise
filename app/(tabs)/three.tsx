@@ -1,62 +1,99 @@
-import { Community } from '@/types';
-import { useRouter } from 'expo-router';
+import { useSchedule } from '@/context/ScheduleContext';
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, Image, ScrollView, TouchableOpacity } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { Button, Card, FAB, Text, useTheme } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import AddClassModal from '@/components/AddClassModal';
+import { formatTime } from '@/utils/timeUtils';
 
-const Three = ({ community }: { community: Community }) => {
-  const router = useRouter();
-  const handlePress = () => {
-    router.push({
-      pathname: `../community/${community.clerkId}`,
-      params: { id: community.clerkId },
-    })
-    console.log(community);
-  };
+const ScheduleScreen = () => {
+  const theme = useTheme();
+  //@ts-ignore
+  const { schedule, deleteClass } = useSchedule();
+  const [visible, setVisible] = useState(false);
+  const [selectedDay, setSelectedDay] = useState('Monday');
+
+  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+
+  const showModal = () => setVisible(true);
+  const hideModal = () => setVisible(false);
 
   return (
-    <TouchableOpacity onPress={handlePress} style={{ marginBottom: 20, padding: 10, backgroundColor: '#eee', borderRadius: 10, width: 300, height: 300 }} >
-      <Image source={{ uri: community.picture }} style={{ width: 100, height: 100, borderRadius: 50 }} />
-      <Text>Name: {community.name}</Text>
-      <Text>Username: {community.username}</Text>
-      <Text>Email: {community.email}</Text>
-      {community.bio && <Text>Bio: {community.bio}</Text>}
-      {community.location && <Text>Location: {community.location}</Text>}
-      {community.portfolioWebsite && <Text>Portfolio Website: {community.portfolioWebsite}</Text>}
-    </TouchableOpacity>
+    <SafeAreaView style={styles.container}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.daysContainer}>
+        {days.map((day) => (
+          <Button
+            key={day}
+            mode={selectedDay === day ? 'contained' : 'outlined'}
+            onPress={() => setSelectedDay(day)}
+            style={styles.dayButton}
+          >
+            {day}
+          </Button>
+        ))}
+      </ScrollView>
+
+      <ScrollView style={styles.scheduleContainer}>
+        {schedule
+          .filter((item) => item.day === selectedDay)
+          .sort((a, b) => a.startTime.localeCompare(b.startTime))
+          .map((item, index) => (
+            <Card key={index} style={styles.classCard}>
+              <Card.Content>
+                <Text variant="titleMedium">{item.courseName}</Text>
+                <Text variant="bodyMedium">Code: {item.courseCode}</Text>
+                <Text variant="bodyMedium">Lecturer: {item.lecturer}</Text>
+                <Text variant="bodyMedium">
+                  Time: {formatTime(item.startTime)} - {formatTime(item.endTime)}
+                </Text>
+              </Card.Content>
+              <Card.Actions>
+                <Button onPress={() => deleteClass(item.id)}>Delete</Button>
+              </Card.Actions>
+            </Card>
+          ))}
+      </ScrollView>
+
+      <FAB
+        icon="plus"
+        style={styles.fab}
+        onPress={showModal}
+      />
+
+      <AddClassModal
+        visible={visible}
+        hideModal={hideModal}
+        selectedDay={selectedDay}
+      />
+    </SafeAreaView>
   );
 };
 
-const CommunityList = () => {
-  const [isLoading, setLoading] = useState(true);
-  const [communities, setCommunities] = useState<Community[]>([]);
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  daysContainer: {
+    flexGrow: 0,
+    padding: 8,
+  },
+  dayButton: {
+    marginHorizontal: 4,
+  },
+  scheduleContainer: {
+    padding: 16,
+  },
+  classCard: {
+    marginBottom: 16,
+  },
+  fab: {
+    position: 'absolute',
+    margin: 16,
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#6200ee',
+  },
+});
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch('https://connect-craft.vercel.app/api/community');
-        const json = await response.json();
-        setCommunities(json.user);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  return (
-    <ScrollView style={{ flex: 1 }}>
-      <View style={{ justifyContent: 'center', alignItems: 'center', paddingVertical: 20 }}>
-        {isLoading ? (
-          <ActivityIndicator size="large" color="blue" />
-        ) : (
-          communities.map((community) => <Three key={community._id} community={community} />)
-        )}
-      </View>
-    </ScrollView>
-  );
-};
-
-export default CommunityList;
+export default ScheduleScreen;
