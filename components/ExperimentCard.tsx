@@ -2,11 +2,14 @@ import { Experiment } from '@/types';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { StyleSheet, Dimensions } from 'react-native';
-import { Card, Title, Paragraph, Button } from 'react-native-paper';
+import { Card, Title, Paragraph, Button, MD3Theme as Theme, useTheme } from 'react-native-paper';
 import Markdown from 'react-native-markdown-display';
 
 const ExperimentCard = ({ experiment }: { experiment: Experiment }) => {
     const router = useRouter();
+    const theme = useTheme();
+    const styles = createStyles(theme)
+    const stylesMarkdown = markdownStyles(theme);
 
     const handlePress = () => {
         router.push(`/experiment/${experiment._id}`);
@@ -22,7 +25,7 @@ const ExperimentCard = ({ experiment }: { experiment: Experiment }) => {
                 <Paragraph style={styles.paragraph}>Course Code: {experiment.CCode}</Paragraph>
                 <Paragraph style={styles.paragraph}>Course Name: {experiment.CName}</Paragraph>
                 <Paragraph style={styles.paragraph}>Experiment Number: {experiment.ExpNo}</Paragraph>
-                <Markdown>{experiment.ExpDesc || 'No description available.'}</Markdown>
+                <Markdown style={stylesMarkdown}>{experiment.ExpDesc || 'No description available.'}</Markdown>
             </Card.Content>
             <Card.Actions>
                 <Button
@@ -36,42 +39,38 @@ const ExperimentCard = ({ experiment }: { experiment: Experiment }) => {
     );
 };
 
-const { width } = Dimensions.get('window');
-
-const styles = StyleSheet.create({
+const createStyles = (theme: Theme) => StyleSheet.create({
     card: {
-        marginBottom: 20,
-        borderRadius: 10,
-        elevation: 3,
-        backgroundColor: "#ffffff",
-        width: width - 20,
-        marginHorizontal: 10,
+        width: Dimensions.get('window').width * 0.9,
+        marginVertical: 8,
+        backgroundColor: theme.colors.elevation.level2,
+        borderRadius: 12,
+        elevation: 2,
+        shadowColor: theme.colors.shadow,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
     },
     title: {
-        fontSize: 20,
-        fontWeight: "bold",
-        color: "#6200ee",
-        marginBottom: 10,
+        color: theme.colors.onSurface,
+        marginBottom: 12,
+        fontWeight: '600',
     },
     paragraph: {
-        fontSize: 16,
-        color: "#333333",
-        marginBottom: 5,
+        color: theme.colors.onSurfaceVariant,
+        marginBottom: 4,
+        fontSize: 14,
     },
-    buttonText: {
-        color: "#6200ee",
-    },
+    content: {
+        padding: 16,
+    }
 });
 
-const markdownStyles = StyleSheet.create({
-    body: {
-        fontSize: 16,
-        color: "#444444",
-        backgroundColor: "#f0f0f0",
-        padding: 10,
-        borderRadius: 5,
-        marginBottom: 20,
-    },
+const markdownStyles = (theme: Theme) => StyleSheet.create({
+    body: { color: theme.colors.onSurfaceVariant },
+    heading1: { color: theme.colors.onSurface },
+    heading2: { color: theme.colors.onSurface },
+    link: { color: theme.colors.primary },
 });
 
 export default ExperimentCard;

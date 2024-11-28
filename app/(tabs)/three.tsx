@@ -1,99 +1,260 @@
-import { useSchedule } from '@/context/ScheduleContext';
-import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
-import { Button, Card, FAB, Text, useTheme } from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import AddClassModal from '@/components/AddClassModal';
-import { formatTime } from '@/utils/timeUtils';
+import React, { useState } from 'react';
+import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
+import { MD3Theme as Theme, useTheme } from 'react-native-paper';
 
-const ScheduleScreen = () => {
+const TimeTablePage = () => {
+  const [activeDay, setActiveDay] = useState<keyof TimetableWeekData>('Monday');
+  const [activeSection, setActiveSection] = useState<'A' | 'B'>('A');
   const theme = useTheme();
-  //@ts-ignore
-  const { schedule, deleteClass } = useSchedule();
-  const [visible, setVisible] = useState(false);
-  const [selectedDay, setSelectedDay] = useState('Monday');
+  const nativeBaseTheme = useTheme();
+  const styles = createStyles(theme, nativeBaseTheme);
 
-  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+  const weekDays: Array<keyof TimetableWeekData> = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
-  const showModal = () => setVisible(true);
-  const hideModal = () => setVisible(false);
+  type TimetableData = {
+    time: string;
+    subject: string;
+    courseCode: string;
+    teacher: string;
+  }[];
+
+  type TimetableWeekData = {
+    [key in 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday']: TimetableData;
+  };
+
+  const sectionATimetable = {
+    Monday: [
+      { time: "9:00 - 12:00", subject: "DAA Lab(A1) / DS Lab(A2)", courseCode: "22CDLS2 / 22CDL53", teacher: "Ms. Pallavi Nayak / Ms. Anchal" },
+      { time: "12:00 - 01:00", subject: "Cloud Computing / Business Analytics", courseCode: "22CDS542 / 22CDS543", teacher: "Ms. Anchal / Ms. Bandari Channaraya Priya" },
+      { time: "01:00 - 02:00", subject: "Lunch Break", courseCode: "-", teacher: "-" },
+      { time: "2:00 - 3:00", subject: "Research Methodology and IPR", courseCode: "22RMK55", teacher: "Ms. Anchal" },
+      { time: "3:00 - 4:00", subject: "Fundamentals of Data Science", courseCode: "22CDS53", teacher: "Dr. Sunil" },
+    ],
+    Tuesday: [
+      { time: "9:00 - 9:55", subject: "Design and Analysis of Algorithms", courseCode: "22CDS52", teacher: "Ms. Pallavi Nayak" },
+      { time: "9:55 - 10:50", subject: "Fundamentals of Data Science", courseCode: "22CDS53", teacher: "Dr. Sunil" },
+      { time: "10:50 - 11:00", subject: "Short Break", courseCode: "-", teacher: "-" },
+      { time: "11:00 - 12:00", subject: "Software Engineering and Project Management", courseCode: "22CDS51", teacher: "Ms. T Sasikala" },
+      { time: "12:00 - 01:00", subject: "Cloud Computing / Business Analytics", courseCode: "22CDS542 / 22CDS543", teacher: "Ms. Anchal / Ms. Bandari Channaraya Priya" },
+      { time: "01:00 - 02:00", subject: "Lunch Break", courseCode: "-", teacher: "-" },
+      { time: "2:00 - 3:00", subject: "Environment Studies", courseCode: "22ESK57", teacher: "Ms. Bandari Channarayya Priya" },
+      { time: "3:00 - 4:50", subject: "Critical and Creative Thinking Skills", courseCode: "22SDK56", teacher: "Mr. Dilip M Bagadi" },
+    ],
+    Wednesday: [
+      { time: "9:00 - 9:55", subject: "Fundamentals of Data Science", courseCode: "22CDS53", teacher: "Dr. Sunil" },
+      { time: "9:55 - 10:50", subject: "Software Engineering and Project Management", courseCode: "22CDS51", teacher: "Ms. T Sasikala" },
+      { time: "10:50 - 11:00", subject: "Short Break", courseCode: "-", teacher: "-" },
+      { time: "11:00 - 12:00", subject: "Software Engineering and Project Management", courseCode: "22CDS51", teacher: "Ms. T Sasikala" },
+      { time: "12:00 - 01:00", subject: "Cloud Computing / Business Analytics", courseCode: "22CDS542 / 22CDS543", teacher: "Ms. Anchal / Ms. Bandari Channaraya Priya" },
+      { time: "01:00 - 02:00", subject: "Lunch Break", courseCode: "-", teacher: "-" },
+      { time: "2:00 - 3:00", subject: "Research Methodology and IPR", courseCode: "22RMK55", teacher: "Ms. Anchal" },
+      { time: "3:00 - 3:55", subject: "Design and Analysis of Algorithms", courseCode: "22CDS52", teacher: "Ms. Pallavi Nayak" },
+    ],
+    Thursday: [
+      { time: "9:00 - 10:50", subject: "Critical and Creative Thinking Skills", courseCode: "22SDK56", teacher: "Mr. Dilip M Bagadi" },
+      { time: "11:00 - 11:15", subject: "Short Break", courseCode: "-", teacher: "-" },
+      { time: "11:00 - 12:00", subject: "Software Engineering and Project Management", courseCode: "22CDS51", teacher: "Ms. T Sasikala" },
+      { time: "12:00 - 1:00", subject: "Research Methodology and IPR", courseCode: "22RMK55", teacher: "Ms. Anchal" },
+      { time: "01:00 - 02:00", subject: "Lunch Break", courseCode: "-", teacher: "-" },
+      { time: "2:00 - 4:55", subject: "DAA Lab(A2) / DS Lab(A1)", courseCode: "22CDLS2 / 22CDL53", teacher: "Ms. Pallavi Nayak / Ms. Anchal" },
+    ],
+    Friday: [
+      { time: "9:00 - 9:55", subject: "Design and Analysis of Algorithms", courseCode: "22CDS52", teacher: "Ms. Pallavi Nayak" },
+      { time: "9:55 - 10:50", subject: "Fundamentals of Data Science", courseCode: "22CDS53", teacher: "Dr. Sunil" },
+      { time: "11:00 - 11:15", subject: "Short Break", courseCode: "-", teacher: "-" },
+      { time: "11:00 - 12:00", subject: "Cloud Computing / Business Analytics", courseCode: "22CDS542 / 22CDS543", teacher: "Ms. Anchal / Ms. Bandari Channaraya Priya" },
+      { time: "12:00 - 1:00", subject: "Design and Analysis of Algorithms", courseCode: "22CDS52", teacher: "Ms. Pallavi Nayak" },
+    ]
+  };
+
+  const sectionBTimetable = {
+    Monday: [
+      { time: "9:00 - 9:55", subject: "Software Engineering and Project Management", courseCode: "22CDS51", teacher: "Dr. Sunil Kumar" },
+      { time: "9:55 - 10:50", subject: "Environment Studies", courseCode: "22ESK57", teacher: "Ms. Kavitha U" },
+      { time: "10:50 - 11:00", subject: "Short Break", courseCode: "-", teacher: "-" },
+      { time: "11:00 - 12:00", subject: "Fundamentals of Data Science", courseCode: "22CDS53", teacher: "Dr. Joshua Daniel Raj" },
+      { time: "12:00 - 01:00", subject: "Cloud Computing / Business Analytics", courseCode: "22CDS542 / 22CDS543", teacher: "Ms. Anchal / Ms. Bandari Channaraya Priya" },
+      { time: "01:00 - 02:00", subject: "Lunch Break", courseCode: "-", teacher: "-" },
+      { time: "2:00 - 3:00", subject: "Design and Analysis of Algorithms", courseCode: "22CDS52", teacher: "Ms. Pallavi Nayak" },
+      { time: "3:00 - 4:50", subject: "Critical and Creative Thinking Skills", courseCode: "22SDK56", teacher: "Mr. Dilip M Bagadi" }
+    ],
+    Tuesday: [
+      { time: "9:00 - 9:55", subject: "Research Methodology and IPR", courseCode: "22RMK55", teacher: "Dr. R Suganya" },
+      { time: "9:55 - 10:50", subject: "Software Engineering and Project Management", courseCode: "22CDS51", teacher: "Dr. Sunil Kumar" },
+      { time: "10:50 - 11:00", subject: "Short Break", courseCode: "-", teacher: "-" },
+      { time: "11:00 - 12:00", subject: "Fundamentals of Data Science", courseCode: "22CDS53", teacher: "Dr. Joshua Daniel Raj" },
+      { time: "12:00 - 01:00", subject: "Cloud Computing / Business Analytics", courseCode: "22CDS542 / 22CDS543", teacher: "Ms. Anchal / Ms. Bandari Channaraya Priya" },
+      { time: "01:00 - 02:00", subject: "Lunch Break", courseCode: "-", teacher: "-" },
+      { time: "2:00 - 3:00", subject: "Software Engineering and Project Management", courseCode: "22CDS51", teacher: "Dr. Sunil Kumar" },
+      { time: "3:00 - 3:55", subject: "Design and Analysis of Algorithms", courseCode: "22CDS52", teacher: "Ms. Pallavi Nayak" },
+    ],
+    Wednesday: [
+      { time: "9:00 - 9:55", subject: "Fundamentals of Data Science", courseCode: "22CDS53", teacher: "Dr. Joshua Daniel Raj" },
+      { time: "9:55 - 10:50", subject: "Design and Analysis of Algorithms", courseCode: "22CDS52", teacher: "Ms. Pallavi Nayak" },
+      { time: "10:50 - 11:00", subject: "Short Break", courseCode: "-", teacher: "-" },
+      { time: "11:00 - 12:00", subject: "Fundamentals of Data Science", courseCode: "22CDS53", teacher: "Dr. Joshua Daniel Raj" },
+      { time: "12:00 - 01:00", subject: "Cloud Computing / Business Analytics", courseCode: "22CDS542 / 22CDS543", teacher: "Ms. Anchal / Ms. Bandari Channaraya Priya" },
+      { time: "01:00 - 02:00", subject: "Lunch Break", courseCode: "-", teacher: "-" },
+      { time: "2:00 - 3:00", subject: "Research Methodology and IPR", courseCode: "22RMK55", teacher: "Dr. R Suganya" },
+      { time: "3:00 - 3:55", subject: "Software Engineering and Project Management", courseCode: "22CDS51", teacher: "Dr. Sunil Kumar" },
+      { time: "3:55 - 4:50", subject: "Design and Analysis of Algorithms", courseCode: "22CDS52", teacher: "Ms. Pallavi Nayak" }
+    ],
+    Thursday: [
+      { time: "9:00 - 12:00", subject: "DAA Lab(B1) / DS Lab(B2)", courseCode: "22CDLS2 / 22CDL53", teacher: "Ms. Pallavi Nayak / Dr. Joshua Daniel Raj" },
+      { time: "12:00 - 1:00", subject: "Research Methodology and IPR", courseCode: "22RMK55", teacher: "Dr. R Suganya" },
+    ],
+    Friday: [
+      { time: "9:00 - 10:50", subject: "Critical and Creative Thinking Skills", courseCode: "22SDK56", teacher: "Mr. Dilip M Bagadi" },
+      { time: "10:50 - 11:00", subject: "Short Break", courseCode: "-", teacher: "-" },
+      { time: "11:00 - 12:00", subject: "Cloud Computing / Business Analytics", courseCode: "22CDS542 / 22CDS543", teacher: "Ms. Anchal / Ms. Bandari Channaraya Priya" },
+      { time: "12:00 - 1:00", subject: "Research Methodology and IPR", courseCode: "22RMK55", teacher: "Dr. R Suganya" },
+      { time: "01:00 - 02:00", subject: "Lunch Break", courseCode: "-", teacher: "-" },
+      { time: "2:00 - 4:55", subject: "DAA Lab(B2) / DS Lab(B1)", courseCode: "22CDLS2 / 22CDL53", teacher: "Ms. Pallavi Nayak / Dr. Joshua Daniel Raj" },
+    ]
+  };
+
+  const currentTimetable = activeSection === 'A' ? sectionATimetable : sectionBTimetable;
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.daysContainer}>
-        {days.map((day) => (
-          <Button
-            key={day}
-            mode={selectedDay === day ? 'contained' : 'outlined'}
-            onPress={() => setSelectedDay(day)}
-            style={styles.dayButton}
+    <View style={[styles.container]}>
+      <View style={styles.sectionContainer}>
+        {['A', 'B'].map((section) => (
+          <Pressable
+            key={section}
+            onPress={() => setActiveSection(section as 'A' | 'B')}
+            style={[
+              styles.sectionTab,
+              {
+                backgroundColor: activeSection === section ? theme.colors.secondaryContainer : theme.colors.background,
+              }
+            ]}
           >
-            {day}
-          </Button>
+            <Text style={[styles.sectionText, { color: theme.colors.onBackground }]}>Section {section}</Text>
+          </Pressable>
         ))}
-      </ScrollView>
+      </View>
 
-      <ScrollView style={styles.scheduleContainer}>
-        {schedule
-          .filter((item) => item.day === selectedDay)
-          .sort((a, b) => a.startTime.localeCompare(b.startTime))
-          .map((item, index) => (
-            <Card key={index} style={styles.classCard}>
-              <Card.Content>
-                <Text variant="titleMedium">{item.courseName}</Text>
-                <Text variant="bodyMedium">Code: {item.courseCode}</Text>
-                <Text variant="bodyMedium">Lecturer: {item.lecturer}</Text>
-                <Text variant="bodyMedium">
-                  Time: {formatTime(item.startTime)} - {formatTime(item.endTime)}
-                </Text>
-              </Card.Content>
-              <Card.Actions>
-                <Button onPress={() => deleteClass(item.id)}>Delete</Button>
-              </Card.Actions>
-            </Card>
+      <View style={styles.daysContainer}>
+        {weekDays.map((day) => (
+          <Pressable
+            key={day}
+            onPress={() => setActiveDay(day)}
+            style={[
+              styles.dayTab,
+              {
+                backgroundColor: activeDay === day ? theme.colors.secondaryContainer : theme.colors.background,
+              }
+            ]}
+          >
+            <Text style={[styles.dayText, { color: theme.colors.onBackground }]}>{day.slice(0, 3)}</Text>
+          </Pressable>
+        ))}
+      </View>
+
+      <Text style={[styles.header, { color: theme.colors.onBackground }]}>
+        Section {activeSection} - {activeDay}
+      </Text>
+
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.tableContainer}
+      >
+        <ScrollView showsVerticalScrollIndicator={false}>
+          {/* Table Header */}
+          <View style={styles.headerRow}>
+            <Text style={[styles.cell, styles.headerCell]}>Time</Text>
+            <Text style={[styles.cell, styles.headerCell]}>Subject</Text>
+            <Text style={[styles.cell, styles.headerCell]}>Course Code</Text>
+            <Text style={[styles.cell, styles.headerCell]}>Teacher</Text>
+          </View>
+
+          {/* Table Content */}
+          {(activeSection === 'A' ? sectionATimetable[activeDay] : sectionBTimetable[activeDay])?.map((slot, index) => (
+            <View key={index} style={styles.row}>
+              <Text style={styles.cell}>{slot.time}</Text>
+              <Text style={styles.cell}>{slot.subject}</Text>
+              <Text style={styles.cell}>{slot.courseCode}</Text>
+              <Text style={styles.cell}>{slot.teacher}</Text>
+            </View>
           ))}
+        </ScrollView>
       </ScrollView>
-
-      <FAB
-        icon="plus"
-        style={styles.fab}
-        onPress={showModal}
-      />
-
-      <AddClassModal
-        visible={visible}
-        hideModal={hideModal}
-        selectedDay={selectedDay}
-      />
-    </SafeAreaView>
+    </View>
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: Theme, nativeBaseTheme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    padding: 16,
+    backgroundColor: theme.colors.background,
+  },
+  tableContainer: {
+    flex: 1,
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    color: theme.colors.onBackground,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    backgroundColor: theme.colors.surfaceVariant,
+  },
+  row: {
+    flexDirection: 'row',
+  },
+  breakRow: {
+    backgroundColor: theme.colors.surfaceVariant,
+  },
+  headerCell: {
+    fontWeight: 'bold',
+    color: theme.colors.onBackground,
+  },
+  cell: {
+    borderWidth: 1,
+    borderColor: theme.colors.outline,
+    padding: 12,
+    width: 120,
+    color: theme.colors.onBackground,
+  },
+  sectionContainer: {
+    flexDirection: 'row',
+    marginBottom: 16,
+    justifyContent: 'center',
+  },
+  sectionTab: {
+    paddingHorizontal: 30,
+    paddingVertical: 8,
+    marginHorizontal: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: theme.colors.outline,
+  },
+  sectionText: {
+    fontWeight: '600',
+    fontSize: 16,
   },
   daysContainer: {
-    flexGrow: 0,
-    padding: 8,
-  },
-  dayButton: {
-    marginHorizontal: 4,
-  },
-  scheduleContainer: {
-    padding: 16,
-  },
-  classCard: {
+    flexDirection: 'row',
     marginBottom: 16,
+    justifyContent: 'space-between',
   },
-  fab: {
-    position: 'absolute',
-    margin: 16,
-    right: 0,
-    bottom: 0,
-    backgroundColor: '#6200ee',
+  dayTab: {
+    flex: 1,
+    paddingVertical: 8,
+    marginHorizontal: 2,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: theme.colors.outline,
+    alignItems: 'center',
+  },
+  dayText: {
+    fontWeight: '500',
+    fontSize: 14,
   },
 });
 
-export default ScheduleScreen;
+export default TimeTablePage;

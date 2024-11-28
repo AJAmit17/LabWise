@@ -4,14 +4,10 @@ import { useFonts } from 'expo-font';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import { useEffect } from 'react';
+import { View, ActivityIndicator, useColorScheme } from 'react-native';
 import { Provider as PaperProvider, MD3DarkTheme, MD3LightTheme } from 'react-native-paper';
 import * as SecureStore from 'expo-secure-store';
-import { useColorScheme } from 'react-native';
-import React from 'react';
-import { NotificationProvider } from '@/context/NotificationContext';
-import { ScheduleProvider } from '@/context/ScheduleContext';
 import { en, registerTranslation } from 'react-native-paper-dates';
 
 registerTranslation('en', en);
@@ -46,7 +42,7 @@ function InitialLayout() {
   const segments = useSegments();
   const router = useRouter();
   const colorScheme = useColorScheme();
-  const [isDarkMode, setIsDarkMode] = useState(colorScheme === 'dark');
+  const isDarkMode = colorScheme === 'dark';
 
   const theme = isDarkMode ? MD3DarkTheme : MD3LightTheme;
   const navigationTheme = isDarkMode ? DarkTheme : DefaultTheme;
@@ -55,54 +51,38 @@ function InitialLayout() {
     if (!isLoaded) return;
 
     const inTabsGroup = segments[0] === '(tabs)';
-    const isExperimentRoute = segments[0] === 'experiment';
 
-    if (isSignedIn && !inTabsGroup && !isExperimentRoute) {
+    if (isSignedIn && !inTabsGroup) {
       router.replace('/(tabs)');
     } else if (!isSignedIn) {
       router.replace('/sign-in');
     }
-  }, [isSignedIn, segments]);
+  }, [isLoaded, isSignedIn]);
 
   if (!isLoaded) return <LoadingScreen />;
 
   return (
     <PaperProvider theme={theme}>
-      <NotificationProvider>
-        <ScheduleProvider>
-          <ThemeProvider value={navigationTheme}>
-            <Stack
-              screenOptions={{
-                headerStyle: {
-                  backgroundColor: theme.colors.surface,
-                },
-                headerTintColor: theme.colors.primary,
-                headerShadowVisible: false,
-                animation: 'slide_from_right',
-              }}
-            >
-              <Stack.Screen name="sign-in" options={{ headerShown: false }} />
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen
-                name="experiment/[id]"
-                options={{
-                  presentation: 'modal',
-                  headerShown: true,
-                  headerTitle: 'Experiment Details',
-                }}
-              />
-              <Stack.Screen name="+not-found" options={{ headerShown: false }} />
-            </Stack>
-            <StatusBar style={isDarkMode ? 'light' : 'dark'} />
-          </ThemeProvider>
-        </ScheduleProvider>
-      </NotificationProvider>
+      <ThemeProvider value={navigationTheme}>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="sign-in" />
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen
+            name="experiment/[id]"
+            options={{
+              presentation: 'modal',
+              headerShown: true,
+              headerTitle: 'Experiment Details',
+            }}
+          />
+        </Stack>
+        <StatusBar style={isDarkMode ? 'light' : 'dark'} />
+      </ThemeProvider>
     </PaperProvider>
   );
 }
 
 export default function RootLayout() {
-  const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
@@ -113,17 +93,10 @@ export default function RootLayout() {
     }
   }, [loaded]);
 
-  if (!publishableKey) {
-    throw new Error('Add EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY to your .env file');
-  }
-
   if (!loaded) return <LoadingScreen />;
 
   return (
-    <ClerkProvider
-      publishableKey={publishableKey}
-      tokenCache={tokenCache}
-    >
+    <ClerkProvider publishableKey={"pk_test_Y2hvaWNlLXNxdWlkLTUuY2xlcmsuYWNjb3VudHMuZGV2JA"} tokenCache={tokenCache}>
       <ClerkLoaded>
         <InitialLayout />
       </ClerkLoaded>

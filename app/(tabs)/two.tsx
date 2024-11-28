@@ -3,8 +3,11 @@ import ExperimentCard from '@/components/ExperimentCard';
 import { Experiment } from '@/types';
 import React, { useEffect, useState, useCallback } from 'react';
 import { ActivityIndicator, ScrollView, View, RefreshControl, StyleSheet } from 'react-native';
+import { MD3Theme as Theme, useTheme } from 'react-native-paper';
 
 const ExperimentList = () => {
+  const theme = useTheme();
+  const styles = createStyles(theme);
   const [isLoading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [experiments, setExperiments] = useState<Experiment[]>([]);
@@ -32,7 +35,7 @@ const ExperimentList = () => {
   }, []);
 
   return (
-    <ScrollView 
+    <ScrollView
       style={styles.container}
       refreshControl={
         <RefreshControl
@@ -56,15 +59,22 @@ const ExperimentList = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: theme.colors.background,
   },
   content: {
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 20,
   },
+  loader: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  }
 });
 
 export default ExperimentList;

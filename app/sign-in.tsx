@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, StyleSheet, Image } from 'react-native';
-import { Text, Button, useTheme } from 'react-native-paper';
+import { View, StyleSheet, Image, Dimensions } from 'react-native';
+import { Text, Button, useTheme, Surface } from 'react-native-paper';
 import { useOAuth } from "@clerk/clerk-expo";
 import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useWarmUpBrowser } from '@/hooks/useWarmUpBrowser';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -18,11 +19,12 @@ const SignIn = () => {
     try {
       const { createdSessionId, setActive } = await startOAuthFlow();
 
-      if (createdSessionId) {
-        if (setActive) {
-          await setActive({ session: createdSessionId });
-        }
-        router.replace("/(tabs)");
+      if (createdSessionId && setActive) {
+        await setActive({ session: createdSessionId });
+        // Add a small delay to ensure session is set
+        setTimeout(() => {
+          router.replace("/(tabs)");
+        }, 100);
       }
     } catch (err) {
       console.error("OAuth error:", err);
@@ -31,31 +33,40 @@ const SignIn = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <View style={styles.logoContainer}>
-        <Image 
-          source={require('../assets/images/logo.png')}
-          style={styles.logo}
-        />
-      </View>
-      
-      <View style={styles.contentContainer}>
-        <Text variant="headlineLarge" style={[styles.title, { color: theme.colors.primary }]}>
-          Welcome to LabWise
-        </Text>
-        <Text variant="bodyLarge" style={[styles.subtitle, { color: theme.colors.secondary }]}>
-          Sign in to continue
-        </Text>
-        
-        <Button 
-          mode="contained"
-          onPress={onPress}
-          style={styles.button}
-          contentStyle={styles.buttonContent}
-          icon="google"
-        >
-          Sign in with Google
-        </Button>
-      </View>
+      <Surface style={styles.card}>
+        <View style={styles.logoContainer}>
+          <Image
+            source={require('../assets/images/logo.png')}
+            style={styles.logo}
+          />
+        </View>
+
+        <View style={styles.contentContainer}>
+          <Text variant="headlineMedium" style={[styles.title, { color: theme.colors.primary }]}>
+            Welcome to LabWise
+          </Text>
+          <Text variant="bodyLarge" style={[styles.subtitle, { color: theme.colors.secondary }]}>
+            Application for CSE-DS Students
+          </Text>
+
+          <Button
+            mode="contained"
+            onPress={onPress}
+            style={styles.button}
+            contentStyle={styles.buttonContent}
+            labelStyle={styles.buttonLabel}
+            icon={({ size, color }) => (
+              <MaterialCommunityIcons name="google" size={size} color={color} />
+            )}
+          >
+            Sign in with Google
+          </Button>
+
+          <Text variant="bodySmall" style={[styles.termsText, { color: theme.colors.outline }]}>
+            By signing in, you agree to our Terms of Service and Privacy Policy
+          </Text>
+        </View>
+      </Surface>
     </View>
   );
 };
@@ -65,36 +76,53 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 16,
+  },
+  card: {
+    width: '100%',
+    maxWidth: 400,
+    padding: 24,
+    borderRadius: 12,
+    alignItems: 'center',
   },
   logoContainer: {
-    marginBottom: 48,
+    marginBottom: 24,
   },
   logo: {
-    width: 120,
-    height: 120,
+    width: 100,
+    height: 100,
     resizeMode: 'contain',
   },
   contentContainer: {
     width: '100%',
-    paddingHorizontal: 24,
     alignItems: 'center',
   },
   title: {
-    marginBottom: 12,
+    marginBottom: 8,
     textAlign: 'center',
+    fontWeight: 'bold',
   },
   subtitle: {
-    marginBottom: 32,
+    marginBottom: 24,
     textAlign: 'center',
-    opacity: 0.7,
+    opacity: 0.8,
   },
   button: {
     width: '100%',
-    maxWidth: 300,
     marginBottom: 16,
+    borderRadius: 8,
   },
   buttonContent: {
     paddingVertical: 8,
+  },
+  buttonLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  termsText: {
+    textAlign: 'center',
+    marginTop: 16,
+    opacity: 0.7,
   },
 });
 

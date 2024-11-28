@@ -2,13 +2,16 @@ import { useLocalSearchParams, useNavigation } from "expo-router";
 import * as Clipboard from 'expo-clipboard';
 import React, { useEffect, useLayoutEffect, useState } from "react";
 import { View, StyleSheet, ScrollView, Dimensions, Text } from "react-native";
-import { ActivityIndicator, Card, Title, Paragraph, Button, Snackbar } from 'react-native-paper';
+import { ActivityIndicator, Card, Title, Paragraph, Button, Snackbar, MD3Theme as Theme, useTheme } from 'react-native-paper';
 import Markdown from 'react-native-markdown-display';
 import { Experiment } from "@/types";
 
 const ExperimentDetail = () => {
   const { id } = useLocalSearchParams();
   const navigation = useNavigation();
+  const theme = useTheme();
+  const styles = createStyles(theme);
+  const markdownStyles = createMarkdownStyles(theme);
   const [experiment, setExperiment] = useState<Experiment | null>(null);
   const [isLoading, setLoading] = useState(true);
   const [visible, setVisible] = useState(false);
@@ -120,50 +123,47 @@ const ExperimentDetail = () => {
 
 const { width } = Dimensions.get('window');
 
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#f5f5f5",
-  },
+const createStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: theme.colors.background,
   },
   card: {
-    marginBottom: 20,
-    borderRadius: 10,
-    elevation: 3,
-    backgroundColor: "#ffffff",
-    width: width - 40,
+    margin: 16,
+    backgroundColor: theme.colors.elevation.level2,
+    borderRadius: 12,
+    elevation: 2,
+    shadowColor: theme.colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   title: {
     fontSize: 24,
-    fontWeight: "bold",
-    color: "#6200ee",
-    marginBottom: 10,
+    fontWeight: 'bold',
+    color: theme.colors.primary,
+    marginBottom: 16,
   },
   paragraph: {
     fontSize: 16,
-    color: "#333333",
-    marginBottom: 5,
+    color: theme.colors.onSurface,
+    marginBottom: 8,
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: "bold",
-    color: "#6200ee",
+    fontWeight: 'bold',
+    color: theme.colors.primary,
     marginTop: 20,
     marginBottom: 10,
   },
   text: {
     fontSize: 18,
-    color: "#333333",
+    color: theme.colors.onSurface,
     marginBottom: 10,
   },
   divider: {
     marginVertical: 20,
+    backgroundColor: theme.colors.outline,
   },
   solutionHeader: {
     flexDirection: 'row',
@@ -172,35 +172,42 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   copyButton: {
-    backgroundColor: '#6200ee',
+    backgroundColor: theme.colors.primary,
   },
   snackbar: {
-    backgroundColor: '#832cf8',
+    backgroundColor: theme.colors.inverseSurface,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
 });
 
-const markdownStyles = {
+const createMarkdownStyles = (theme: Theme) => ({
+  body: {
+    color: theme.colors.onSurface,
+    fontSize: 16,
+  },
+  code_inline: {
+    backgroundColor: theme.colors.elevation.level1,
+    color: theme.colors.primary,
+  },
   code_block: {
-    backgroundColor: '#f5f5f5',
-    padding: 16,
+    backgroundColor: theme.colors.elevation.level1,
+    color: theme.colors.onSurface,
+    padding: 12,
     borderRadius: 8,
-    fontFamily: 'monospace',
-    fontSize: 14,
   },
-  heading1: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#6200ee',
-    marginTop: 20,
-    marginBottom: 10,
+  fence: {
+    backgroundColor: theme.colors.elevation.level1,
+    color: theme.colors.onSurface,
+    padding: 12,
+    borderRadius: 8,
   },
-  heading2: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#6200ee',
-    marginTop: 15,
-    marginBottom: 8,
+  link: {
+    color: theme.colors.primary,
   },
-};
+});
 
 export default ExperimentDetail;
