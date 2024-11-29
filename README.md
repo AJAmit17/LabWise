@@ -1,50 +1,115 @@
-# Welcome to your Expo app 👋
+# LabWise - Academic Lab Management System 📱
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+[![Expo](https://img.shields.io/badge/Expo-v13.2.3-blue.svg)](https://expo.dev)
+[![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Web-green.svg)](https://docs.expo.dev)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-## Get started
+## Project Overview
 
-1. Install dependencies
+LabWise is a comprehensive mobile application designed to streamline laboratory management for academic institutions. Built using React Native and Expo, it provides a unified platform for students and faculty to access lab materials, schedules, and resources.
 
+## Project Objectives
+
+- Simplify access to lab manuals and procedures
+- Provide organized storage of lab solutions and materials
+- Enable easy navigation through course schedules
+- Create a seamless cross-platform experience
+
+## Technology Stack
+
+- **Frontend Framework**: React Native with Expo
+- **UI Components**: React Native Paper
+- **Navigation**: Expo Router
+- **Icons**: Material Icons & SF Symbols
+- **State Management**: React Hooks
+- **Build System**: EAS (Expo Application Services)
+
+## Core Features
+
+### 1. Lab Management
+- Digital lab manual access
+- Step-by-step experiment guides
+- Integrated solutions repository
+- Resource documentation
+
+### 2. Academic Tools
+- Interactive timetable viewer
+- Course material organization
+- Subject-wise categorization
+- Quick reference guides
+
+### 3. User Interface
+- Modern, intuitive design
+- Cross-platform consistency
+- Dark/Light mode support
+- Responsive layouts
+
+### 4. Technical Implementation
+
+#### Routing System
+- File-based routing using Expo Router
+- Deep linking support
+- Tab-based navigation
+- Stack navigation for detailed views
+
+#### Data Management
+- Efficient state management
+- Async storage implementation
+- Secure data handling
+- Optimized content delivery
+
+## Project Structure
+
+## 📋 Prerequisites
+
+- Node.js (v14 or higher)
+- npm or yarn
+- Expo CLI
+- iOS Simulator (for iOS development)
+- Android Studio (for Android development)
+
+## 🛠 Installation
+
+1. Clone the repository
+   ```bash
+   git clone [your-repository-url]
+   cd ccapp
+   ```
+
+2. Install dependencies
    ```bash
    npm install
    ```
 
-2. Start the app
-
+3. Start the development server
    ```bash
-    npx expo start
+   npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+## 🏗 Development
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+### Available Scripts
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- `npx expo start` - Start the development server
+- `npm run reset-project` - Reset the project to a fresh state
+- `eas build` - Build the application using EAS
 
-## Get a fresh project
+### Environment Setup
 
-When you're ready, run:
+The project uses different configurations for various environments:
 
-```bash
-npm run reset-project
-```
+- Development: Uses development client with internal distribution
+- Preview: Internal distribution build
+- Production: Automated versioning with auto-increment
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## 📱 Running the App
 
-## Learn more
+You can run the app in multiple ways:
+- Using Expo Go
+- On iOS Simulator
+- On Android Emulator
+- Through development builds
 
-To learn more about developing your project with Expo, look at the following resources:
+## 🚀 Deployment
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+This project uses EAS (Expo Application Services) for building and deployment. Configure your builds in `eas.json`:
