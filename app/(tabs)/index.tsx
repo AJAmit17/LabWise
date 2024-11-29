@@ -10,7 +10,9 @@ import HeroSection from '@/components/landing/heroSection';
 import InfoCard from '@/components/landing/inforCard';
 import SubjectsSection from '@/components/landing/subjectSection';
 import FeaturesSection from '@/components/landing/featureSection';
+
 import Footer from '@/components/landing/footer';
+import ContactSection from '@/components/landing/contact';
 
 const { width } = Dimensions.get('window');
 
@@ -57,7 +59,7 @@ const customDarkTheme = {
 };
 
 export default function App() {
-  const colorScheme = useColorScheme(); // Detect light or dark mode
+  const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? customDarkTheme : customLightTheme;
 
   const [fontsLoaded] = useFonts({
@@ -89,8 +91,11 @@ export default function App() {
               <Animated.View entering={FadeIn.duration(1000).delay(900)}>
                 <FeaturesSection />
               </Animated.View>
+              <Animated.View entering={FadeIn.duration(1000).delay(1200)}>
+                <Footer />
+              </Animated.View>
             </View>
-            <Footer />
+            <ContactSection />
           </ScrollView>
         </SafeAreaProvider>
       </PaperProvider>
@@ -107,6 +112,6 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 20,
-    paddingTop: 30, // Add some top padding to separate from the hero section
+    paddingTop: 30,
   },
 });

@@ -24,7 +24,7 @@ export default function Footer() {
                     <Text style={[styles.footerTitle, { textDecorationLine: 'underline' }]}>Built by Amit</Text>
                 </TouchableOpacity>
                 <Text style={styles.footerText}>
-                    Not on App Store because we can't afford the $25 developer fee{'\n'}
+                    Not on App Store because I can't afford the $25 developer fee{'\n'}
                     Fully Open-Source and Free to Use*
                 </Text>
                 <Text style={styles.footerSubtext}>

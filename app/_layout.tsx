@@ -96,7 +96,7 @@ export default function RootLayout() {
   if (!loaded) return <LoadingScreen />;
 
   return (
-    <ClerkProvider publishableKey={"pk_test_Y2hvaWNlLXNxdWlkLTUuY2xlcmsuYWNjb3VudHMuZGV2JA"} tokenCache={tokenCache}>
+    <ClerkProvider publishableKey={process.env.CLERK_PUBLISHABLE_KEY!} tokenCache={tokenCache}>
       <ClerkLoaded>
         <InitialLayout />
       </ClerkLoaded>

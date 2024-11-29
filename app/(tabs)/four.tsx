@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, ScrollView, StyleSheet, Alert, Linking } from 'react-native';
-import { Card, Text, ActivityIndicator, useTheme, Button, MD3Theme as Theme } from 'react-native-paper';
+import { Card, Text, ActivityIndicator, useTheme, Button, Searchbar, MD3Theme as Theme, Divider, Banner, Surface } from 'react-native-paper';
 import { RefreshControl } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-const PINATA_JWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiIxMDlhNTIyNC03YzFhLTQ4NzMtOTFlMi1hMGNlY2M3YTQyNjYiLCJlbWFpbCI6ImFtaXRhY2hhcnlhMjYzQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJwaW5fcG9saWN5Ijp7InJlZ2lvbnMiOlt7ImRlc2lyZWRSZXBsaWNhdGlvbkNvdW50IjoxLCJpZCI6IkZSQTEifSx7ImRlc2lyZWRSZXBsaWNhdGlvbkNvdW50IjoxLCJpZCI6Ik5ZQzEifV0sInZlcnNpb24iOjF9LCJtZmFfZW5hYmxlZCI6ZmFsc2UsInN0YXR1cyI6IkFDVElWRSJ9LCJhdXRoZW50aWNhdGlvblR5cGUiOiJzY29wZWRLZXkiLCJzY29wZWRLZXlLZXkiOiI0YWNlNjM2NGE5ODIzMTcyOWI3YSIsInNjb3BlZEtleVNlY3JldCI6IjIyODAyODIyNWQ2NmZiOGY2YTM3YzU3MTNhYWQ1OTkwNjRhZDMwNTMwMDQ1NWE5NTU1OWE3MmIxOGNhNWYwZmYiLCJleHAiOjE3NjQzMjk0NDd9.LLW_F-su6evJuh_1oNoqUWa76NnbhJD-wmuslKCOwtg";
+const PINATA_JWT = process.env.PINATA_JWT;
 
 interface PinataFile {
     id: string;
@@ -14,19 +15,15 @@ interface PinataFile {
     created_at: string;
 }
 
-interface PinataResponse {
-    data: {
-        files: PinataFile[];
-        next_page_token?: string;
-    };
-}
-
 export default function ResourcesScreen() {
     const theme = useTheme();
     const styles = createStyles(theme);
     const [files, setFiles] = useState<PinataFile[]>([]);
+    const [filteredFiles, setFilteredFiles] = useState<PinataFile[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [error, setError] = useState<string | null>(null);
 
     const fetchFiles = async () => {
         try {
@@ -60,6 +57,28 @@ export default function ResourcesScreen() {
         fetchFiles();
     }, []);
 
+    const getFileIcon = (mimeType: string) => {
+        if (mimeType.includes('pdf')) return 'file-pdf-box';
+        if (mimeType.includes('image')) return 'file-image';
+        if (mimeType.includes('video')) return 'file-video';
+        if (mimeType.includes('audio')) return 'file-music';
+        return 'file-document';
+    };
+
+    const formatFileSize = (bytes: number) => {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    };
+
+    useEffect(() => {
+        const filtered = files.filter(file =>
+            file.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        setFilteredFiles(filtered);
+    }, [searchQuery, files]);
 
     const handleDownload = async (fileCid: string) => {
         try {
@@ -101,10 +120,32 @@ export default function ResourcesScreen() {
 
     return (
         <View style={styles.container}>
-            <Text variant="headlineMedium" style={styles.title}>Study Materials</Text>
+            <Surface style={styles.header} elevation={2}>
+                <Text variant="headlineMedium" style={styles.title}>Study Materials</Text>
+                <Searchbar
+                    placeholder="Search files..."
+                    onChangeText={setSearchQuery}
+                    value={searchQuery}
+                    style={styles.searchbar}
+                    iconColor={theme.colors.primary}
+                />
+            </Surface>
+
+            {error && (
+                <Banner
+                    visible={true}
+                    actions={[{ label: 'Retry', onPress: fetchFiles }]}
+                    icon="alert-circle"
+                >
+                    {error}
+                </Banner>
+            )}
 
             {loading ? (
-                <ActivityIndicator style={styles.loader} color={theme.colors.primary} />
+                <View style={styles.loaderContainer}>
+                    <ActivityIndicator size="large" color={theme.colors.primary} />
+                    <Text style={styles.loaderText}>Loading resources...</Text>
+                </View>
             ) : (
                 <ScrollView
                     style={styles.fileList}
@@ -118,22 +159,48 @@ export default function ResourcesScreen() {
                         />
                     }
                 >
-                    {files.map((file) => (
+                    {filteredFiles.map((file) => (
                         <Card key={file.id} style={styles.fileCard} mode="elevated">
-                            <Card.Content>
-                                <Text variant="titleMedium" style={styles.fileName}>
-                                    {file.name}
-                                </Text>
+                            <Card.Content style={styles.cardContent}>
+                                <View style={styles.fileHeader}>
+                                    <MaterialCommunityIcons
+                                        name={getFileIcon(file.mime_type)}
+                                        size={32}
+                                        color={theme.colors.primary}
+                                    />
+                                    <View style={styles.fileDetails}>
+                                        <Text variant="titleMedium" style={styles.fileName}>
+                                            {file.name}
+                                        </Text>
+                                        <Text variant="bodySmall" style={styles.fileInfo}>
+                                            {formatFileSize(file.size)} • {new Date(file.created_at).toLocaleDateString()}
+                                        </Text>
+                                    </View>
+                                </View>
+                                <Divider style={styles.divider} />
                                 <Button
-                                    mode="contained"
+                                    mode="contained-tonal"
                                     onPress={() => handleDownload(file.cid)}
                                     icon="download"
+                                    style={styles.downloadButton}
                                 >
                                     Download
                                 </Button>
                             </Card.Content>
                         </Card>
                     ))}
+                    {filteredFiles.length === 0 && !loading && (
+                        <View style={styles.emptyState}>
+                            <MaterialCommunityIcons
+                                name="file-search"
+                                size={48}
+                                color={theme.colors.primary}
+                            />
+                            <Text variant="titleMedium" style={styles.emptyStateText}>
+                                No files found
+                            </Text>
+                        </View>
+                    )}
                 </ScrollView>
             )}
         </View>
@@ -145,11 +212,18 @@ const createStyles = (theme: Theme) => StyleSheet.create({
         flex: 1,
         backgroundColor: theme.colors.background,
     },
-    title: {
+    header: {
         padding: 16,
+        backgroundColor: theme.colors.surface,
+    },
+    title: {
         textAlign: 'center',
         color: theme.colors.onBackground,
+        marginBottom: 16,
+    },
+    searchbar: {
         marginBottom: 8,
+        elevation: 0,
     },
     fileList: {
         padding: 16,
@@ -167,19 +241,46 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     cardContent: {
         padding: 16,
     },
+    fileHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    fileDetails: {
+        marginLeft: 12,
+        flex: 1,
+    },
     fileName: {
         color: theme.colors.onSurface,
-        marginBottom: 8,
         fontWeight: '600',
+        marginBottom: 8,
     },
     fileInfo: {
         color: theme.colors.onSurfaceVariant,
         marginBottom: 4,
         fontSize: 12,
     },
-    loader: {
+    divider: {
+        marginVertical: 12,
+    },
+    downloadButton: {
+        marginTop: 8,
+    },
+    loaderContainer: {
         flex: 1,
-        alignSelf: 'center',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    loaderText: {
+        marginTop: 16,
+        color: theme.colors.primary,
+    },
+    emptyState: {
+        alignItems: 'center',
+        padding: 32,
+    },
+    emptyStateText: {
+        marginTop: 16,
+        color: theme.colors.onSurfaceVariant,
     },
     progressBar: {
         marginTop: 8,

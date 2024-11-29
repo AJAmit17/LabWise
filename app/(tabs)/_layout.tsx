@@ -45,7 +45,7 @@ export default function TabLayout() {
 
   const HeaderRight = useCallback(() => (
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-      <ThemeIcon />
+      {/* <ThemeIcon /> */}
       <IconButton
         icon="logout"
         size={24}
