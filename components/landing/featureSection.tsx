@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { Card, Title, Text, useTheme } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Animated, { FadeInRight } from 'react-native-reanimated';
+import { router } from 'expo-router';
 
 const features = [
     {
@@ -24,6 +25,11 @@ const features = [
         icon: "calendar-check",
         text: "Class Time-Table",
         description: "Quick access to your class schedule"
+    },
+    {
+        icon: "account-check",
+        text: "Attendance Tracker",
+        description: "Track and manage your attendance"
     }
 ];
 
@@ -39,7 +45,11 @@ export default function FeaturesSection() {
                         key={index}
                         entering={FadeInRight.delay(300 * index).duration(500)}
                     >
-                        <Card style={styles.featureCard} mode="outlined">
+                        <Card 
+                            style={styles.featureCard} 
+                            mode="outlined"
+                            onPress={() => feature.text === "Attendance Tracker" ? router.push('/attendence/page') : null}
+                        >
                             <Card.Content style={styles.featureContent}>
                                 <MaterialCommunityIcons
                                     name={feature.icon as any}

@@ -30,9 +30,12 @@ const tokenCache = {
 };
 
 function LoadingScreen() {
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme === 'dark';
+
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <ActivityIndicator size="large" color="#6200ee" />
+      <ActivityIndicator size="large" color={isDarkMode ? "#bb86fc" : "#6200ee"} />
     </View>
   );
 }
@@ -64,7 +67,19 @@ function InitialLayout() {
   return (
     <PaperProvider theme={theme}>
       <ThemeProvider value={navigationTheme}>
-        <Stack screenOptions={{ headerShown: false }}>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            animation: 'slide_from_right',
+            headerStyle: {
+              backgroundColor: theme.colors.surface,
+            },
+            headerTintColor: theme.colors.onSurface,
+            contentStyle: {
+              backgroundColor: theme.colors.background,
+            }
+          }}
+        >
           <Stack.Screen name="sign-in" />
           <Stack.Screen name="(tabs)" />
           <Stack.Screen
@@ -73,6 +88,47 @@ function InitialLayout() {
               presentation: 'modal',
               headerShown: true,
               headerTitle: 'Experiment Details',
+            }}
+          />
+          <Stack.Screen
+            name="attendence/page"
+            options={{
+              headerShown: true,
+              headerTitle: 'Attendance Dashboard',
+              animation: 'slide_from_right',
+            }}
+          />
+          <Stack.Screen
+            name="attendence/addCourse/page"
+            options={{
+              headerShown: true,
+              headerTitle: 'Add New Course',
+              animation: 'fade_from_bottom',
+              presentation: 'modal',
+            }}
+          />
+          <Stack.Screen
+            name="attendence/calender/page"
+            options={{
+              headerShown: true,
+              headerTitle: 'Calendar View',
+              animation: 'fade_from_bottom',
+            }}
+          />
+          <Stack.Screen
+            name="attendence/stats/page"
+            options={{
+              headerShown: true,
+              headerTitle: 'Statistics',
+              animation: 'fade',
+            }}
+          />
+          <Stack.Screen
+            name="attendence/listCourse/page"
+            options={{
+              headerShown: true,
+              headerTitle: 'Manage Courses',
+              animation: 'slide_from_right',
             }}
           />
         </Stack>
@@ -96,7 +152,7 @@ export default function RootLayout() {
   if (!loaded) return <LoadingScreen />;
 
   return (
-    <ClerkProvider publishableKey={process.env.CLERK_PUBLISHABLE_KEY!} tokenCache={tokenCache}>
+    <ClerkProvider publishableKey={"pk_test_Y2hvaWNlLXNxdWlkLTUuY2xlcmsuYWNjb3VudHMuZGV2JA"} tokenCache={tokenCache}>
       <ClerkLoaded>
         <InitialLayout />
       </ClerkLoaded>

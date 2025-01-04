@@ -26,7 +26,7 @@ const CommunityScreen = () => {
         try {
             setLoading(true);
             
-            const token = process.env.CLERK_API_KEY;
+            const token = "sk_test_PAb4qWI35lcFsTWZxBs5ymqKSivpl0jvubb0xu4hyq";
 
             const response = await fetch('https://api.clerk.com/v1/users?limit=10&offset=0&order_by=-created_at', {
                 headers: {

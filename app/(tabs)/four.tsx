@@ -4,7 +4,8 @@ import { Card, Text, ActivityIndicator, useTheme, Button, Searchbar, MD3Theme as
 import { RefreshControl } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-const PINATA_JWT = process.env.PINATA_JWT;
+// const PINATA_JWT = process.env.PINATA_JWT;
+const PINATA_JWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiIxMDlhNTIyNC03YzFhLTQ4NzMtOTFlMi1hMGNlY2M3YTQyNjYiLCJlbWFpbCI6ImFtaXRhY2hhcnlhMjYzQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJwaW5fcG9saWN5Ijp7InJlZ2lvbnMiOlt7ImRlc2lyZWRSZXBsaWNhdGlvbkNvdW50IjoxLCJpZCI6IkZSQTEifSx7ImRlc2lyZWRSZXBsaWNhdGlvbkNvdW50IjoxLCJpZCI6Ik5ZQzEifV0sInZlcnNpb24iOjF9LCJtZmFfZW5hYmxlZCI6ZmFsc2UsInN0YXR1cyI6IkFDVElWRSJ9LCJhdXRoZW50aWNhdGlvblR5cGUiOiJzY29wZWRLZXkiLCJzY29wZWRLZXlLZXkiOiIwNmRkMThmNmIzNGVlNjZmODNhNSIsInNjb3BlZEtleVNlY3JldCI6IjA3ZDhjMWExNzA5MjlkMDI1ZjhhYTAxNWMwYjIxOGJiNzA2ZTM4M2M1MmJjYzY3ZTAzNTE3NDM0N2FmNTRiNjgiLCJleHAiOjE3Njc1MzIyODF9.2m7oD6PblYBZOOUk5Ud7YIBuu5Z97UqKOBe1ww0eQGk";
 
 interface PinataFile {
     id: string;
