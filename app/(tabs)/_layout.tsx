@@ -1,79 +1,53 @@
-import { PaperProvider, adaptNavigationTheme, IconButton } from 'react-native-paper';
-import { DefaultTheme, DarkTheme } from '@react-navigation/native';
+import { PaperProvider } from 'react-native-paper';
 import { Tabs } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { StyleSheet, useColorScheme, View } from 'react-native';
-import { useState, useCallback } from 'react';
-import { lightTheme, darkTheme } from '../../theme';
-import { useAuth } from "@clerk/clerk-expo";
+import { StyleSheet, useColorScheme } from 'react-native';
+import { useState } from 'react';
+import { lightTheme, darkTheme } from '@/theme';
 
 export default function TabLayout() {
-  const { signOut } = useAuth();
   const colorScheme = useColorScheme();
-  const [isDarkTheme, setIsDarkTheme] = useState(colorScheme === 'dark');
-
+  const [isDarkTheme] = useState(colorScheme === 'dark');
   const theme = isDarkTheme ? darkTheme : lightTheme;
-  const { LightTheme, DarkTheme: NavigationDarkTheme } = adaptNavigationTheme({
-    reactNavigationLight: DefaultTheme,
-    reactNavigationDark: DarkTheme,
-  });
-
-  const toggleTheme = useCallback(() => {
-    setIsDarkTheme(!isDarkTheme);
-  }, [isDarkTheme]);
-
-  const handleLogout = useCallback(async () => {
-    try {
-      await signOut();
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
-  }, []);
-
-  const ThemeIcon = useCallback(() => (
-    <IconButton
-      icon={isDarkTheme ? 'white-balance-sunny' : 'moon-waning-crescent'}
-      size={24}
-      iconColor={theme.colors.primary}
-      onPress={toggleTheme}
-      style={[
-        styles.themeToggle,
-        { backgroundColor: theme.colors.surface }
-      ]}
-    />
-  ), [isDarkTheme, theme]);
-
-  const HeaderRight = useCallback(() => (
-    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-      {/* <ThemeIcon /> */}
-      <IconButton
-        icon="logout"
-        size={24}
-        iconColor={theme.colors.primary}
-        onPress={handleLogout}
-        style={[
-          styles.themeToggle,
-          { backgroundColor: theme.colors.surface }
-        ]}
-      />
-    </View>
-  ), [isDarkTheme, theme, handleLogout]);
 
   return (
-    <PaperProvider theme={theme}>
+    <PaperProvider
+      // @ts-ignore
+      theme={theme}
+    >
       <Tabs
         screenOptions={{
-          tabBarStyle: [styles.tabBar, { backgroundColor: theme.colors.surface }],
           tabBarActiveTintColor: theme.colors.primary,
-          tabBarInactiveTintColor: isDarkTheme ? '#757575' : '#999999',
+          tabBarInactiveTintColor: theme.colors.onSurfaceVariant,
+          tabBarStyle: {
+            backgroundColor: theme.colors.surface,
+            borderTopColor: theme.colors.surfaceVariant,
+            borderTopWidth: 1,
+            height: 80,
+            paddingBottom: 12,
+            paddingTop: 12,
+            shadowColor: theme.colors.onSurface,
+            shadowOffset: { width: 0, height: -4 },
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+            elevation: 8,
+          },
           headerStyle: {
             backgroundColor: theme.colors.surface,
-            elevation: 0,
-            shadowOpacity: 0,
+            shadowColor: theme.colors.onSurface,
+            elevation: 4,
           },
-          headerTintColor: theme.colors.primary,
-          tabBarLabelStyle: styles.tabBarLabel,
-          headerRight: () => <HeaderRight />,
+          headerTintColor: theme.colors.onSurface,
+          tabBarLabelStyle: {
+            fontFamily: theme.fonts.labelLarge?.fontFamily,
+            fontWeight: theme.fonts.labelLarge?.fontWeight as "normal" | "bold" | "100" | "200" | "300" | "400" | "500" | "600" | "700" | "800" | "900",
+            fontSize: 12,
+            marginBottom: 4,
+          },
+          headerTitleStyle: {
+            ...theme.fonts.bodyMedium,
+            color: theme.colors.onSurface,
+          } as any,
           headerRightContainerStyle: {
             paddingRight: 8,
           },
@@ -84,11 +58,7 @@ export default function TabLayout() {
           options={{
             headerShown: false,
             tabBarIcon: ({ color, focused }) => (
-              <Ionicons
-                name={focused ? "home" : "home-outline"}
-                size={24}
-                color={color}
-              />
+              <Ionicons name={focused ? "home" : "home-outline"} size={24} color={color} />
             ),
             tabBarLabel: 'Home',
           }}
@@ -99,12 +69,9 @@ export default function TabLayout() {
             title: "Experiments",
             headerTitle: "NHCE CSE-DS Lab Experiments",
             tabBarIcon: ({ color, focused }) => (
-              <Ionicons
-                name={focused ? "flask" : "flask-outline"}
-                size={24}
-                color={color}
-              />
+              <Ionicons name={focused ? "flask" : "flask-outline"} size={24} color={color} />
             ),
+            headerShown: false,
           }}
         />
         <Tabs.Screen
@@ -115,6 +82,7 @@ export default function TabLayout() {
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="calendar" size={size} color={color} />
             ),
+            headerShown: false,
           }}
         />
         <Tabs.Screen
@@ -124,34 +92,30 @@ export default function TabLayout() {
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="file-document" size={size} color={color} />
             ),
+            headerShown: false,
           }}
         />
         <Tabs.Screen
           name="five"
           options={{
-            title: "Community",
+            title: "Attendance",
             tabBarIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="account-group" size={size} color={color} />
+              <MaterialCommunityIcons name="calendar-check" size={size} color={color} />
             ),
+            headerShown: false,
           }}
         />
       </Tabs>
-    </PaperProvider >
+    </PaperProvider>
   );
 }
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: '#ffffff',
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
-    height: 60,
-    paddingBottom: 5,
-    paddingTop: 5,
-  },
-  tabBarLabel: {
-    fontSize: 12,
-    fontWeight: '500',
+    height: 65,
+    paddingBottom: 10,
+    paddingTop: 10,
   },
   themeToggle: {
     margin: 4,

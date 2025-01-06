@@ -13,7 +13,6 @@ export type Community = {
     joinedAt?: Date;
   };
   
-  
   export type Experiment = {
     _id: string;
     year: number;

@@ -1,66 +1,24 @@
 import React from 'react';
 import { StyleSheet, View, ScrollView, Dimensions, useColorScheme } from 'react-native';
-import { Provider as PaperProvider, MD3LightTheme, MD3DarkTheme } from 'react-native-paper';
+import { Provider as PaperProvider } from 'react-native-paper';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { useFonts, Poppins_400Regular, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
+import { lightTheme, darkTheme } from '@/theme';
 import HeroSection from '@/components/landing/heroSection';
 import InfoCard from '@/components/landing/inforCard';
 import SubjectsSection from '@/components/landing/subjectSection';
 import FeaturesSection from '@/components/landing/featureSection';
-
 import Footer from '@/components/landing/footer';
 import ContactSection from '@/components/landing/contact';
 
 const { width } = Dimensions.get('window');
 
-const customLightTheme = {
-  ...MD3LightTheme,
-  colors: {
-    ...MD3LightTheme.colors,
-    primary: '#6200EE',
-    accent: '#03DAC6',
-    background: '#F5F5F5',
-    surface: '#FFFFFF',
-    text: '#000000',
-    onSurface: '#000000',
-  },
-  fonts: {
-    ...MD3LightTheme.fonts,
-    bodyLarge: { fontFamily: 'Poppins_400Regular', fontWeight: 400 },
-    bodyMedium: { fontFamily: 'Poppins_600SemiBold', fontWeight: 600 },
-    bodySmall: { fontFamily: 'Poppins_400Regular', fontWeight: 400 },
-    labelLarge: { fontFamily: 'Poppins_400Regular', fontWeight: 400 },
-    thin: { fontFamily: 'Poppins_400Regular', fontWeight: 100 },
-  },
-};
-
-const customDarkTheme = {
-  ...MD3DarkTheme,
-  colors: {
-    ...MD3DarkTheme.colors,
-    primary: '#BB86FC',
-    accent: '#03DAC6',
-    background: '#121212',
-    surface: '#1F1B24',
-    text: '#FFFFFF',
-    onSurface: '#FFFFFF',
-  },
-  fonts: {
-    ...MD3DarkTheme.fonts,
-    bodyLarge: { fontFamily: 'Poppins_400Regular', fontWeight: 400 },
-    bodyMedium: { fontFamily: 'Poppins_600SemiBold', fontWeight: 600 },
-    bodySmall: { fontFamily: 'Poppins_400Regular', fontWeight: 400 },
-    labelLarge: { fontFamily: 'Poppins_400Regular', fontWeight: 400 },
-    thin: { fontFamily: 'Poppins_400Regular', fontWeight: 100 },
-  },
-};
-
 export default function App() {
   const colorScheme = useColorScheme();
-  const theme = colorScheme === 'dark' ? customDarkTheme : customLightTheme;
+  const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
 
   const [fontsLoaded] = useFonts({
     Poppins_400Regular,

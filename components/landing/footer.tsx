@@ -17,7 +17,7 @@ export default function Footer() {
     return (
         <View style={styles.footer}>
             <LinearGradient
-                colors={['#4A00E0', '#8E2DE2']}
+                colors={['#1A237E', '#283593']}
                 style={styles.footerGradient}
             >
                 <TouchableOpacity onPress={openPortfolio}>
@@ -36,12 +36,13 @@ export default function Footer() {
                     style={styles.sourceButton}
                     contentStyle={styles.sourceButtonContent}
                     onPress={openGitHub}
+                    textColor='white'
                 >
                     Source Code
                 </Button>
             </LinearGradient>
         </View>
-    );
+    );6
 }
 
 const styles = StyleSheet.create({

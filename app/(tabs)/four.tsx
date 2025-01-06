@@ -4,8 +4,7 @@ import { Card, Text, ActivityIndicator, useTheme, Button, Searchbar, MD3Theme as
 import { RefreshControl } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-// const PINATA_JWT = process.env.PINATA_JWT;
-const PINATA_JWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiIxMDlhNTIyNC03YzFhLTQ4NzMtOTFlMi1hMGNlY2M3YTQyNjYiLCJlbWFpbCI6ImFtaXRhY2hhcnlhMjYzQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJwaW5fcG9saWN5Ijp7InJlZ2lvbnMiOlt7ImRlc2lyZWRSZXBsaWNhdGlvbkNvdW50IjoxLCJpZCI6IkZSQTEifSx7ImRlc2lyZWRSZXBsaWNhdGlvbkNvdW50IjoxLCJpZCI6Ik5ZQzEifV0sInZlcnNpb24iOjF9LCJtZmFfZW5hYmxlZCI6ZmFsc2UsInN0YXR1cyI6IkFDVElWRSJ9LCJhdXRoZW50aWNhdGlvblR5cGUiOiJzY29wZWRLZXkiLCJzY29wZWRLZXlLZXkiOiIwNmRkMThmNmIzNGVlNjZmODNhNSIsInNjb3BlZEtleVNlY3JldCI6IjA3ZDhjMWExNzA5MjlkMDI1ZjhhYTAxNWMwYjIxOGJiNzA2ZTM4M2M1MmJjYzY3ZTAzNTE3NDM0N2FmNTRiNjgiLCJleHAiOjE3Njc1MzIyODF9.2m7oD6PblYBZOOUk5Ud7YIBuu5Z97UqKOBe1ww0eQGk";
+const PINATA_JWT = process.env.PINATA_JWT;
 
 interface PinataFile {
     id: string;
@@ -121,15 +120,18 @@ export default function ResourcesScreen() {
 
     return (
         <View style={styles.container}>
-            <Surface style={styles.header} elevation={2}>
-                <Text variant="headlineMedium" style={styles.title}>Study Materials</Text>
-                <Searchbar
-                    placeholder="Search files..."
-                    onChangeText={setSearchQuery}
-                    value={searchQuery}
-                    style={styles.searchbar}
-                    iconColor={theme.colors.primary}
-                />
+            <Surface style={styles.headerContainer} elevation={4}>
+                <View style={styles.headerContent}>
+                    <Text style={styles.headerTitle}>Study Materials</Text>
+                    <Text style={styles.headerSubtitle}>CSE-DS Resources</Text>
+                    <Searchbar
+                        placeholder="Search files..."
+                        onChangeText={setSearchQuery}
+                        value={searchQuery}
+                        style={styles.searchbar}
+                        iconColor={theme.colors.primary}
+                    />
+                </View>
             </Surface>
 
             {error && (
@@ -213,31 +215,45 @@ const createStyles = (theme: Theme) => StyleSheet.create({
         flex: 1,
         backgroundColor: theme.colors.background,
     },
-    header: {
-        padding: 16,
+    headerContainer: {
         backgroundColor: theme.colors.surface,
+        paddingTop: 60,
+        paddingBottom: 20,
+        borderBottomLeftRadius: 24,
+        borderBottomRightRadius: 24,
+        marginBottom: 16,
+        elevation: 4,
     },
-    title: {
-        textAlign: 'center',
-        color: theme.colors.onBackground,
+    headerContent: {
+        paddingHorizontal: 16,
+    },
+    headerTitle: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        color: theme.colors.primary,
+        marginBottom: 4,
+    },
+    headerSubtitle: {
+        fontSize: 16,
+        color: theme.colors.onSurfaceVariant,
         marginBottom: 16,
     },
     searchbar: {
-        marginBottom: 8,
         elevation: 0,
+        borderRadius: 12,
+        backgroundColor: theme.colors.surfaceVariant,
     },
     fileList: {
         padding: 16,
     },
     fileCard: {
         marginBottom: 16,
-        backgroundColor: theme.colors.elevation.level2,
+        backgroundColor: theme.colors.surface,
         borderRadius: 12,
         elevation: 2,
         shadowColor: theme.colors.shadow,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
+        borderWidth: 1,
+        borderColor: theme.colors.surfaceVariant,
     },
     cardContent: {
         padding: 16,
@@ -262,9 +278,11 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     },
     divider: {
         marginVertical: 12,
+        backgroundColor: theme.colors.surfaceVariant,
     },
     downloadButton: {
         marginTop: 8,
+        backgroundColor: theme.colors.surfaceVariant,
     },
     loaderContainer: {
         flex: 1,

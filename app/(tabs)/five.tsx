@@ -1,174 +1,484 @@
 import React, { useState, useEffect } from 'react';
 import { View, ScrollView, StyleSheet, RefreshControl } from 'react-native';
-import { Text, Card, Avatar, useTheme, ActivityIndicator } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+    Card,
+    Title,
+    FAB,
+    Text,
+    Button,
+    Portal,
+    Dialog,
+    useTheme,
+    Divider,
+    Chip,
+} from 'react-native-paper';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Course, AttendanceRecord, ExtraClassesRecord } from '@/types';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-interface User {
-    email_addresses: any;
-    id: string;
-    username: string;
-    first_name: string | null;
-    last_name: string | null;
-    image_url: string;
-    profile_image_url: string;
-    last_active_at: number;
-    created_at: number;
-    has_image: boolean;
+interface StatusIconMap {
+    present: string;
+    absent: string;
+    noclass: string;
 }
 
-const CommunityScreen = () => {
+interface QuickActionButtonProps {
+    icon: string;
+    label: string;
+    onPress: () => void;
+}
+
+//@ts-ignore
+function getDayName(dateString) {
+    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    return days[new Date(dateString).getDay()];
+}
+
+export default function HomePage() {
     const theme = useTheme();
-    const [users, setUsers] = useState<User[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [courses, setCourses] = useState<Course[]>([]);
+    const [attendance, setAttendance] = useState<AttendanceRecord>({});
+    const [showDialog, setShowDialog] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const router = useRouter();
+    const today = new Date().toISOString().split('T')[0];
+    const dayName = getDayName(today);
 
-    const fetchUsers = async () => {
-        try {
-            setLoading(true);
-            
-            const token = "sk_test_PAb4qWI35lcFsTWZxBs5ymqKSivpl0jvubb0xu4hyq";
+    useEffect(() => {
+        loadData();
+    }, []);
 
-            const response = await fetch('https://api.clerk.com/v1/users?limit=10&offset=0&order_by=-created_at', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-            });
+    const loadData = async () => {
+        const [savedCourses, savedAttendance] = await Promise.all([
+            AsyncStorage.getItem('courses'),
+            AsyncStorage.getItem('attendance'),
+            // AsyncStorage.getItem('extraClasses')
+        ]);
+        if (savedCourses) setCourses(JSON.parse(savedCourses));
+        if (savedAttendance) setAttendance(JSON.parse(savedAttendance));
+    };
 
-            if (!response.ok) {
-                throw new Error('Failed to fetch users');
+    //@ts-ignore
+    const saveAttendance = async (courseId, status) => {
+        const newAttendance = {
+            ...attendance,
+            [today]: {
+                ...(attendance[today] || {}),
+                [courseId]: status
             }
+        };
+        await AsyncStorage.setItem('attendance', JSON.stringify(newAttendance));
+        setAttendance(newAttendance);
+    };
 
-            const data = await response.json();
-            setUsers(data);
-            setError(null);
-        } catch (err) {
-            console.error('Error:', err);
-            setError('Failed to load community members');
-        } finally {
-            setLoading(false);
-            setRefreshing(false);
+    const onRefresh = React.useCallback(async () => {
+        setRefreshing(true);
+        await Promise.all([
+            loadData(),
+        ]);
+        setRefreshing(false);
+    }, []);
+
+    const todaySchedule = courses.flatMap((course) => {
+        const todaySlots = course.schedule?.filter((slot) => slot.day === dayName) || [];
+        return todaySlots.map(slot => ({
+            ...course,
+            slotId: slot.id,
+            timeSlot: slot
+        }));
+    }).sort((a, b) => a.timeSlot.time.localeCompare(b.timeSlot.time));
+
+    const getAttendanceRate = () => {
+        let totalPresent = 0;
+        let totalClasses = 0;
+
+        // Count only actual classes (exclude 'noclass')
+        Object.values(attendance).forEach(day => {
+            Object.entries(day).forEach(([_, status]) => {
+                if (status !== 'noclass') {  // Skip if marked as 'no class'
+                    totalClasses++;
+                    if (status === 'present') totalPresent++;
+                }
+            });
+        });
+
+        return totalClasses > 0 ? totalPresent / totalClasses : 0;
+    };
+
+    // Update the Today's Classes count to exclude 'noclass'
+    const getTodayClassCount = () => {
+        const today = new Date().toISOString().split('T')[0];
+
+        // Get the base schedule count for today
+        const regularClassesCount = todaySchedule.length;
+
+        // Count marked classes for today (including extra classes)
+        let markedClassesCount = 0;
+        if (attendance[today]) {
+            Object.values(attendance[today]).forEach(status => {
+                if (status !== 'noclass') {
+                    markedClassesCount++;
+                }
+            });
+        }
+
+        // Return the larger number between scheduled and marked classes
+        return Math.max(regularClassesCount, markedClassesCount);
+    };
+
+    const getStatusIcon = (status: keyof StatusIconMap | undefined) => {
+        switch (status) {
+            case 'present': return 'check-circle' as const;
+            case 'absent': return 'close-circle' as const;
+            case 'noclass': return 'minus-circle' as const;
+            default: return 'help-circle' as const;
         }
     };
 
-    const onRefresh = React.useCallback(() => {
-        setRefreshing(true);
-        fetchUsers();
-    }, []);
-
-    const formatDate = (timestamp: number) => {
-        return new Date(timestamp).toLocaleDateString();
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'present': return { bg: '#E8F5E9', text: '#2E7D32' };
+            case 'absent': return { bg: '#FFEBEE', text: '#C62828' };
+            case 'noclass': return { bg: '#E3F2FD', text: '#1565C0' };
+            default: return { bg: '#F5F5F5', text: '#424242' };
+        }
     };
-
-    useEffect(() => {
-        fetchUsers();
-    }, []);
 
     return (
         <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-            <Text variant="headlineMedium" style={[styles.title, { color: theme.colors.onBackground }]}>
-                Community Members ({users.length})
-            </Text>
+            <LinearGradient
+                colors={['#1A237E', '#3949AB']}
+                style={styles.gradientHeader}
+            >
+                <SafeAreaView style={styles.headerContent}>
+                    <Text style={styles.welcomeText}>Welcome Back!</Text>
+                    <Text style={styles.date}>
+                        {new Date().toLocaleDateString('en-US', {
+                            weekday: 'long',
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        })}
+                    </Text>
+                    <View style={styles.statsContainer}>
+                        <View style={[styles.statCard, { backgroundColor: theme.colors.surfaceVariant, borderColor: theme.colors.primary }]}>
+                            <MaterialCommunityIcons name="book-education" size={24} color="white" />
+                            <Text style={styles.statValue}>{getTodayClassCount()}</Text>
+                            <Text style={styles.statLabel}>Today's Classes</Text>
+                        </View>
+                        <View style={[styles.statCard, { backgroundColor: theme.colors.surfaceVariant, borderColor: theme.colors.primary }]}>
+                            <MaterialCommunityIcons name="chart-line" size={24} color="white" />
+                            <Text style={styles.statValue}>{`${(getAttendanceRate() * 100).toFixed(0)}%`}</Text>
+                            <Text style={styles.statLabel}>Attendance Rate</Text>
+                        </View>
+                    </View>
+                </SafeAreaView>
+            </LinearGradient>
 
-            {loading ? (
-                <ActivityIndicator style={styles.loader} color={theme.colors.primary} />
-            ) : error ? (
-                <Text style={[styles.error, { color: theme.colors.error }]}>{error}</Text>
-            ) : (
-                <ScrollView
-                    style={styles.scrollView}
-                    refreshControl={
-                        <RefreshControl
-                            refreshing={refreshing}
-                            onRefresh={onRefresh}
-                            colors={[theme.colors.primary]}
-                            tintColor={theme.colors.primary}
-                            progressBackgroundColor={theme.colors.surface}
-                        />
-                    }
-                >
-                    {users.map((user) => (
-                        <Card
-                            key={user.id}
-                            style={[styles.card, { backgroundColor: theme.colors.elevation.level2 }]}
-                            mode="elevated"
-                        >
-                            <Card.Content style={styles.cardContent}>
-                                <Avatar.Image
-                                    size={60}
-                                    source={{ uri: user.profile_image_url || user.image_url }}
-                                    style={styles.avatar}
-                                />
-                                <View style={styles.userInfo}>
-                                    <Text variant="titleMedium" style={{ color: theme.colors.onSurface }}>
-                                        {user.first_name} {user.last_name}
-                                    </Text>
-                                    <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-                                        Email: {user.email_addresses[0].email_address}
-                                    </Text>
-                                    <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                                        Joined: {formatDate(user.created_at)}
-                                    </Text>
-                                    <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                                        Last active: {formatDate(user.last_active_at)}
-                                    </Text>
-                                </View>
+            <ScrollView
+                contentContainerStyle={styles.scrollContent}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                }
+            >
+                <View style={styles.content}>
+                    <Text variant="titleLarge" style={[styles.sectionTitle, { color: theme.colors.onBackground }]}>
+                        Today's Schedule
+                    </Text>
+
+                    {todaySchedule.length === 0 ? (
+                        <Card style={[styles.emptyCard, {
+                            backgroundColor: theme.colors.surface,
+                            borderColor: theme.colors.surfaceVariant
+                        }]}>
+                            <Card.Content style={styles.emptyCardContent}>
+                                <MaterialCommunityIcons name="calendar-blank" size={48} color="#9E9E9E" />
+                                <Text variant="titleMedium" style={[styles.emptyText, { color: theme.colors.onSurface }]}>
+                                    No Classes Today
+                                </Text>
+                                <Text variant="bodyMedium" style={[styles.emptySubtext, { color: theme.colors.onSurfaceVariant }]}>
+                                    Time to catch up on studies!
+                                </Text>
                             </Card.Content>
                         </Card>
-                    ))}
-                </ScrollView>
-            )}
+                    ) : (
+                        todaySchedule.map((schedule) => (
+                            <Card key={schedule.slotId} style={[styles.courseCard, {
+                                backgroundColor: theme.colors.surface,
+                                borderColor: theme.colors.surfaceVariant
+                            }]}>
+                                <Card.Content>
+                                    <View style={styles.courseHeader}>
+                                        <View style={styles.courseInfo}>
+                                            <Title style={[styles.courseName, { color: theme.colors.onSurface }]}>
+                                                {schedule.courseName}
+                                            </Title>
+                                            <View style={styles.timeContainer}>
+                                                <MaterialCommunityIcons name="clock-outline" size={16} color="#666" />
+                                                <Text style={[styles.courseTime, { color: theme.colors.onSurfaceVariant }]}>
+                                                    {schedule.timeSlot.time}
+                                                </Text>
+                                            </View>
+                                        </View>
+                                        <View style={[
+                                            styles.statusBadge,
+                                            { backgroundColor: getStatusColor(attendance[today]?.[schedule.slotId]).bg }
+                                        ]}>
+                                            <MaterialCommunityIcons
+                                                name={getStatusIcon(attendance[today]?.[schedule.slotId])}
+                                                size={16}
+                                                color={getStatusColor(attendance[today]?.[schedule.slotId]).text}
+                                            />
+                                            <Text style={[
+                                                styles.statusText,
+                                                { color: getStatusColor(attendance[today]?.[schedule.slotId]).text }
+                                            ]}>
+                                                {attendance[today]?.[schedule.slotId] || 'Not Marked'}
+                                            </Text>
+                                        </View>
+                                    </View>
+                                    <Divider style={styles.divider} />
+                                    <View style={styles.attendanceButtons}>
+                                        {['present', 'absent', 'noclass'].map((status) => (
+                                            <Chip
+                                                key={status}
+                                                selected={attendance[today]?.[schedule.slotId] === status}
+                                                onPress={() => saveAttendance(schedule.slotId, status)}
+                                                style={[
+                                                    styles.statusChip,
+                                                    {
+                                                        backgroundColor: attendance[today]?.[schedule.slotId] === status
+                                                            ? getStatusColor(status).bg
+                                                            : 'transparent'
+                                                    }
+                                                ]}
+                                                textStyle={{
+                                                    color: attendance[today]?.[schedule.slotId] === status
+                                                        ? getStatusColor(status).text
+                                                        : '#666'
+                                                }}
+                                            >
+                                                {status.charAt(0).toUpperCase() + status.slice(1)}
+                                            </Chip>
+                                        ))}
+                                    </View>
+                                </Card.Content>
+                            </Card>
+                        ))
+                    )}
+
+                    <Text variant="titleLarge" style={[styles.sectionTitle, { color: theme.colors.onBackground }]}>
+                        Quick Actions
+                    </Text>
+                    <View style={styles.quickActions}>
+                        <QuickActionButton
+                            icon="calendar-month"
+                            label="Calendar"
+                            onPress={() => router.push('/attendence/calendar/page')}
+                        />
+                        <QuickActionButton
+                            icon="chart-box"
+                            label="Statistics"
+                            onPress={() => router.push('/attendence/stats/page')}
+                        />
+                        <QuickActionButton
+                            icon="book-edit"
+                            label="Courses"
+                            onPress={() => router.push('/attendence/listCourse/page')}
+                        />
+                    </View>
+                </View>
+            </ScrollView>
+
+            <FAB
+                icon="plus"
+                label="Add Course"
+                color={theme.colors.onPrimary}
+                style={[styles.fab, { backgroundColor: theme.colors.primary }]}
+                onPress={() => router.push('/attendence/addCourse/page')}
+            />
+
+            <Portal>
+                <Dialog visible={showDialog} onDismiss={() => setShowDialog(false)}>
+                    <Dialog.Title>Course Information</Dialog.Title>
+                    <Dialog.Content>
+                        <Text variant="bodyMedium">
+                            View detailed course information and attendance history.
+                        </Text>
+                    </Dialog.Content>
+                    <Dialog.Actions>
+                        <Button mode="contained" onPress={() => setShowDialog(false)}>
+                            Close
+                        </Button>
+                    </Dialog.Actions>
+                </Dialog>
+            </Portal>
         </View>
+    );
+}
+
+const QuickActionButton = ({ icon, label, onPress }: QuickActionButtonProps) => {
+    const theme = useTheme();
+    return (
+        <Card style={[styles.actionCard, { backgroundColor: theme.colors.secondaryContainer }]} onPress={onPress}>
+            <Card.Content style={styles.actionCardContent}>
+                <MaterialCommunityIcons name={icon as keyof typeof MaterialCommunityIcons.glyphMap} size={32} color={theme.colors.onSecondaryContainer} />
+                <Text style={[styles.actionLabel, { color: theme.colors.onSecondaryContainer }]}>{label}</Text>
+            </Card.Content>
+        </Card>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 16,
     },
-    title: {
-        textAlign: 'center',
-        marginBottom: 16,
+    scrollContent: {
+        flexGrow: 1,
     },
-    scrollView: {
-        flex: 1,
+    gradientHeader: {
+        width: '100%',
+        paddingBottom: 32,
+        borderBottomLeftRadius: 24,
+        borderBottomRightRadius: 24,
     },
-    card: {
-        marginBottom: 12,
-        borderRadius: 12,
+    headerContent: {
+        padding: 24,
     },
-    cardContent: {
-        flexDirection: 'row',
-        padding: 16,
-    },
-    avatar: {
-        marginRight: 16,
-    },
-    userInfo: {
-        flex: 1,
-        justifyContent: 'center',
-    },
-    loader: {
-        flex: 1,
-        alignSelf: 'center',
-    },
-    error: {
-        textAlign: 'center',
-        marginTop: 20,
-    },
-    badges: {
-        flexDirection: 'row',
-        gap: 8,
-        marginTop: 4,
-    },
-    badge: {
-        paddingHorizontal: 8,
-        paddingVertical: 2,
-        borderRadius: 12,
-        fontSize: 12,
+    welcomeText: {
         color: 'white',
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 8,
+    },
+    date: {
+        color: 'white',
+        fontSize: 16,
+        opacity: 0.9,
+        marginBottom: 24,
+    },
+    statsContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        gap: 16,
+    },
+    statCard: {
+        flex: 1,
+        borderRadius: 16,
+        padding: 16,
+        alignItems: 'center',
+        borderWidth: 1,
+    },
+    statValue: {
+        color: 'white',
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginVertical: 8,
+    },
+    statLabel: {
+        color: 'white',
+        fontSize: 14,
+        opacity: 0.9,
+    },
+    content: {
+        padding: 16,
+    },
+    sectionTitle: {
+        marginVertical: 24,
+        fontWeight: 'bold',
+        fontSize: 20,
+    },
+    emptyCard: {
+        marginBottom: 24,
+        borderRadius: 16,
+        elevation: 2,
+        borderWidth: 1,
+    },
+    emptyCardContent: {
+        alignItems: 'center',
+        padding: 32,
+    },
+    emptyText: {
+        marginTop: 16,
+    },
+    emptySubtext: {
+        marginTop: 8,
+    },
+    courseCard: {
+        marginBottom: 16,
+        borderRadius: 16,
+        elevation: 4,
+        borderWidth: 1,
+    },
+    courseHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    courseInfo: {
+        flex: 1,
+    },
+    courseName: {
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+    timeContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 8,
+    },
+    courseTime: {
+        marginLeft: 4,
+    },
+    statusBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 8,
+        borderRadius: 12,
+        gap: 4,
+    },
+    statusText: {
+        fontSize: 12,
+        fontWeight: '500',
+        textTransform: 'capitalize',
+    },
+    divider: {
+        marginVertical: 16,
+    },
+    attendanceButtons: {
+        flexDirection: 'row',
+        gap: 12,
+    },
+    statusChip: {
+        borderRadius: 12,
+        borderWidth: 1,
+    },
+    quickActions: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 12,
+        marginBottom: 80,
+    },
+    actionCard: {
+        flex: 1,
+        minWidth: 100,
+        borderRadius: 16,
+        elevation: 3,
+    },
+    actionCardContent: {
+        alignItems: 'center',
+        padding: 16,
+    },
+    actionLabel: {
+        marginTop: 8,
+        fontWeight: '500',
+    },
+    fab: {
+        position: 'absolute',
+        right: 16,
+        bottom: 16,
     },
 });
-
-export default CommunityScreen;

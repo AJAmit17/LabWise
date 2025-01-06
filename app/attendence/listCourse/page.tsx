@@ -24,6 +24,7 @@ interface EditableCourse extends Course {
 }
 
 export default function ListCourse() {
+    const theme = useTheme();
     const [courses, setCourses] = useState<Course[]>([]);
     const [editingCourse, setEditingCourse] = useState<Course | null>(null);
     const [showDialog, setShowDialog] = useState(false);
@@ -32,7 +33,6 @@ export default function ListCourse() {
     const [currentTime, setCurrentTime] = useState('');
     const [visible, setVisible] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
-    const theme = useTheme();
 
     const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -122,27 +122,45 @@ export default function ListCourse() {
 
     const deleteCourse = async (courseId: string) => {
         try {
-            // Remove course from courses list
-            const courseIndex = courses.findIndex(course => course.id === courseId);
             const updatedCourses = courses.filter(course => course.id !== courseId);
             await AsyncStorage.setItem('courses', JSON.stringify(updatedCourses));
 
-            // Clean up attendance records
-            const savedAttendance = await AsyncStorage.getItem('attendance');
-            if (savedAttendance) {
-                const attendance = JSON.parse(savedAttendance);
-                // For each day in attendance records
-                Object.keys(attendance).forEach(date => {
-                    // Remove the attendance entry for the deleted course
-                    if (attendance[date][courseIndex] !== undefined) {
-                        delete attendance[date][courseIndex];
-                    }
-                    // If no attendance records left for that day, remove the day entry
-                    if (Object.keys(attendance[date]).length === 0) {
-                        delete attendance[date];
+            const courseToDelete = courses.find(c => c.id === courseId);
+            const slotsToDelete = courseToDelete?.schedule?.map(slot => slot.id) || [];
+
+            const attendanceData = await AsyncStorage.getItem('attendance');
+            if (attendanceData) {
+                const attendanceRecords = JSON.parse(attendanceData);
+                Object.keys(attendanceRecords).forEach(date => {
+                    slotsToDelete.forEach(slotId => {
+                        if (attendanceRecords[date][slotId]) {
+                            delete attendanceRecords[date][slotId];
+                        }
+                    });
+
+                    if (Object.keys(attendanceRecords[date]).length === 0) {
+                        delete attendanceRecords[date];
                     }
                 });
-                await AsyncStorage.setItem('attendance', JSON.stringify(attendance));
+                await AsyncStorage.setItem('attendance', JSON.stringify(attendanceRecords));
+            }
+
+            // Clean up extra classes
+            const extraClassesData = await AsyncStorage.getItem('extraClasses');
+            if (extraClassesData) {
+                const extraClasses = JSON.parse(extraClassesData);
+                Object.keys(extraClasses).forEach(date => {
+                    Object.entries(extraClasses[date]).forEach(([slotId, data]) => {
+                        //@ts-ignore
+                        if (data.courseId === courseId) {
+                            delete extraClasses[date][slotId];
+                        }
+                    });
+                    if (Object.keys(extraClasses[date]).length === 0) {
+                        delete extraClasses[date];
+                    }
+                });
+                await AsyncStorage.setItem('extraClasses', JSON.stringify(extraClasses));
             }
 
             setCourses(updatedCourses);
@@ -155,9 +173,8 @@ export default function ListCourse() {
     const closeMenu = () => setVisible(false);
 
     return (
-        <View style={styles.container}>
-
-            <ScrollView 
+        <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+            <ScrollView
                 style={styles.scrollView}
                 refreshControl={
                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -167,27 +184,33 @@ export default function ListCourse() {
                     <Card style={styles.emptyCard}>
                         <Card.Content style={styles.emptyCardContent}>
                             <IconButton icon="book-outline" size={48} />
-                            <Text variant="titleMedium">No courses added yet</Text>
-                            <Text variant="bodyMedium">Add your first course to get started</Text>
+                            <Text variant="titleMedium" style={styles.emptyTitle}>
+                                No courses added yet
+                            </Text>
+                            <Text variant="bodyMedium" style={styles.emptySubtitle}>
+                                Add your first course to get started
+                            </Text>
                         </Card.Content>
                     </Card>
                 ) : (
                     courses.map((course) => (
-                        <Card key={course.id} style={styles.courseCard}>
+                        <Card key={course.id} style={[styles.courseCard, { backgroundColor: theme.colors.surface }]}>
                             <Card.Content>
                                 <View style={styles.courseHeader}>
-                                    <Title>{course.courseName}</Title>
+                                    <Title style={[styles.courseTitle, { color: theme.colors.onSurface }]}>{course.courseName}</Title>
                                     <View style={styles.actionButtons}>
                                         <IconButton
                                             icon="pencil"
                                             size={20}
                                             onPress={() => startEditing(course)}
+                                            style={styles.editButton}
                                         />
                                         <IconButton
                                             icon="delete"
                                             size={20}
                                             iconColor={theme.colors.error}
                                             onPress={() => deleteCourse(course.id)}
+                                            style={styles.deleteButton}
                                         />
                                     </View>
                                 </View>
@@ -210,7 +233,7 @@ export default function ListCourse() {
             </ScrollView>
 
             <Portal>
-                <Dialog visible={showDialog} onDismiss={() => setShowDialog(false)}>
+                <Dialog visible={showDialog} onDismiss={() => setShowDialog(false)} style={{ backgroundColor: theme.colors.background }}>
                     <Dialog.Title>Edit Course</Dialog.Title>
                     <Dialog.Content>
                         <TextInput
@@ -227,7 +250,8 @@ export default function ListCourse() {
                                 <Button mode="outlined" onPress={openMenu} style={styles.input}>
                                     {currentDay || "Select Day"}
                                 </Button>
-                            }>
+                            }
+                        >
                             {daysOfWeek.map((day) => (
                                 <Menu.Item
                                     key={day}
@@ -268,66 +292,100 @@ export default function ListCourse() {
                             ))}
                         </View>
                     </Dialog.Content>
-                    <Dialog.Actions>
-                        <Button onPress={() => setShowDialog(false)}>Cancel</Button>
-                        <Button onPress={saveCourseChanges} mode="contained">Save</Button>
+                    <Dialog.Actions style={styles.dialogActions}>
+                        <Button 
+                            mode="outlined"
+                            onPress={() => setShowDialog(false)}
+                            style={[styles.dialogButton, { borderColor: theme.colors.primary }]}
+                            labelStyle={{ color: theme.colors.primary }}
+                        >
+                            Cancel
+                        </Button>
+                        <Button 
+                            mode="contained"
+                            onPress={saveCourseChanges}
+                            style={[styles.dialogButton, { backgroundColor: theme.colors.primary }]}
+                            labelStyle={{ color: theme.colors.onPrimary }}
+                        >
+                            Save
+                        </Button>
                     </Dialog.Actions>
                 </Dialog>
             </Portal>
         </View>
     );
-}
+};
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        padding: 16,
     },
     scrollView: {
+        marginBottom: 16,
+    },
+    emptyCard: {
         padding: 16,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    emptyCardContent: {
+        alignItems: "center",
+    },
+    emptyTitle: {
+        marginTop: 8,
+        fontWeight: "bold",
+    },
+    emptySubtitle: {
+        marginTop: 4,
+        color: "gray",
     },
     courseCard: {
         marginBottom: 16,
         borderRadius: 12,
         elevation: 2,
     },
-    emptyCard: {
-        margin: 16,
-        padding: 32,
-        alignItems: 'center',
-        borderRadius: 12,
-    },
-    emptyCardContent: {
-        alignItems: 'center',
-        gap: 8,
-    },
     courseHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+    },
+    courseTitle: {
+        fontWeight: "bold",
+        fontSize: 16,
     },
     actionButtons: {
-        flexDirection: 'row',
+        flexDirection: "row",
+        alignItems: "center",
     },
+    editButton: {
+        marginRight: 8,
+    },
+    deleteButton: {},
     divider: {
-        marginVertical: 12,
+        marginVertical: 8,
     },
     chipContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 8,
-        marginTop: 8,
+        flexDirection: "row",
+        flexWrap: "wrap",
     },
     chip: {
-        marginRight: 4,
-        marginBottom: 4,
+        margin: 4,
     },
     input: {
         marginBottom: 16,
     },
-    segmentedButtons: {
-        marginBottom: 16,
-    },
     addButton: {
         marginBottom: 16,
+    },
+    dialogActions: {
+        paddingHorizontal: 16,
+        paddingBottom: 16,
+    },
+    dialogButton: {
+        minWidth: 100,
+        marginHorizontal: 4,
+        borderRadius: 8,
+        borderWidth: 2,
     },
 });

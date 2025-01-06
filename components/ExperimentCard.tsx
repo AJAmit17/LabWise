@@ -31,6 +31,7 @@ const ExperimentCard = ({ experiment }: { experiment: Experiment }) => {
                 <Button
                     mode="contained"
                     onPress={handlePress}
+                    textColor='white'
                 >
                     View Details
                 </Button>
@@ -43,7 +44,7 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     card: {
         width: Dimensions.get('window').width * 0.9,
         marginVertical: 8,
-        backgroundColor: theme.colors.elevation.level2,
+        backgroundColor: theme.colors.surface,
         borderRadius: 12,
         elevation: 2,
         shadowColor: theme.colors.shadow,
@@ -63,11 +64,11 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     },
     content: {
         padding: 16,
-    }
+    },
 });
 
 const markdownStyles = (theme: Theme) => StyleSheet.create({
-    body: { color: theme.colors.onSurfaceVariant },
+    body: { color: theme.colors.onSurface },
     heading1: { color: theme.colors.onSurface },
     heading2: { color: theme.colors.onSurface },
     link: { color: theme.colors.primary },

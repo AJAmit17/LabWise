@@ -16,7 +16,7 @@ const ContactSection = () => {
   };
 
   return (
-    <Animated.View 
+    <Animated.View
       entering={FadeIn.duration(1000).delay(1200)}
       style={[styles.container, { backgroundColor: theme.colors.surface }]}
     >
@@ -34,6 +34,7 @@ const ContactSection = () => {
             <MaterialCommunityIcons name="github" size={size} color={color} />
           )}
           style={styles.button}
+          textColor={theme.colors.onPrimary}
         >
           Report on GitHub
         </Button>
@@ -44,6 +45,7 @@ const ContactSection = () => {
             <MaterialCommunityIcons name="email" size={size} color={color} />
           )}
           style={styles.button}
+          textColor={theme.colors.onBackground}
         >
           Email Me
         </Button>

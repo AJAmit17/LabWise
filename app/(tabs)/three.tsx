@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
-import { MD3Theme as Theme, useTheme } from 'react-native-paper';
+import { MD3Theme as Theme, useTheme, Surface } from 'react-native-paper';
 
 const TimeTablePage = () => {
   const [activeDay, setActiveDay] = useState<keyof TimetableWeekData>('Monday');
@@ -117,43 +117,44 @@ const TimeTablePage = () => {
 
   return (
     <View style={[styles.container]}>
-      <View style={styles.sectionContainer}>
-        {['A', 'B'].map((section) => (
-          <Pressable
-            key={section}
-            onPress={() => setActiveSection(section as 'A' | 'B')}
-            style={[
-              styles.sectionTab,
-              {
-                backgroundColor: activeSection === section ? theme.colors.secondaryContainer : theme.colors.background,
-              }
-            ]}
-          >
-            <Text style={[styles.sectionText, { color: theme.colors.onBackground }]}>Section {section}</Text>
-          </Pressable>
-        ))}
-      </View>
-
-      <View style={styles.daysContainer}>
-        {weekDays.map((day) => (
-          <Pressable
-            key={day}
-            onPress={() => setActiveDay(day)}
-            style={[
-              styles.dayTab,
-              {
-                backgroundColor: activeDay === day ? theme.colors.secondaryContainer : theme.colors.background,
-              }
-            ]}
-          >
-            <Text style={[styles.dayText, { color: theme.colors.onBackground }]}>{day.slice(0, 3)}</Text>
-          </Pressable>
-        ))}
-      </View>
-
-      <Text style={[styles.header, { color: theme.colors.onBackground }]}>
-        Section {activeSection} - {activeDay}
-      </Text>
+      <Surface style={styles.headerContainer} elevation={4}>
+        <View style={styles.headerContent}>
+          <Text style={styles.headerTitle}>Time Table</Text>
+          <Text style={styles.headerSubtitle}>CSE-DS 5th Semester</Text>
+        </View>
+        <View style={styles.sectionContainer}>
+          {['A', 'B'].map((section) => (
+            <Pressable
+              key={section}
+              onPress={() => setActiveSection(section as 'A' | 'B')}
+              style={[
+                styles.sectionTab,
+                {
+                  backgroundColor: activeSection === section ? theme.colors.secondary : theme.colors.background,
+                }
+              ]}
+            >
+              <Text style={[styles.sectionText, { color: theme.colors.onSurface }]}>Section {section}</Text>
+            </Pressable>
+          ))}
+        </View>
+        <View style={styles.daysContainer}>
+          {weekDays.map((day) => (
+            <Pressable
+              key={day}
+              onPress={() => setActiveDay(day)}
+              style={[
+                styles.dayTab,
+                {
+                  backgroundColor: activeDay === day ? theme.colors.secondary : theme.colors.background,
+                }
+              ]}
+            >
+              <Text style={[styles.dayText, { color: theme.colors.onBackground }]}>{day.slice(0, 3)}</Text>
+            </Pressable>
+          ))}
+        </View>
+      </Surface>
 
       <ScrollView
         horizontal
@@ -187,11 +188,12 @@ const TimeTablePage = () => {
 const createStyles = (theme: Theme, nativeBaseTheme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
     backgroundColor: theme.colors.background,
+    paddingHorizontal: 16,
   },
   tableContainer: {
     flex: 1,
+    // paddingHorizontal: 16, // Move padding from container to tableContainer
   },
   header: {
     fontSize: 24,
@@ -205,20 +207,21 @@ const createStyles = (theme: Theme, nativeBaseTheme: any) => StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
+    backgroundColor: theme.colors.surface,
   },
   breakRow: {
     backgroundColor: theme.colors.surfaceVariant,
   },
   headerCell: {
     fontWeight: 'bold',
-    color: theme.colors.onBackground,
+    color: theme.colors.onSurfaceVariant,
   },
   cell: {
     borderWidth: 1,
     borderColor: theme.colors.outline,
     padding: 12,
     width: 120,
-    color: theme.colors.onBackground,
+    color: theme.colors.onSurface,
   },
   sectionContainer: {
     flexDirection: 'row',
@@ -254,6 +257,30 @@ const createStyles = (theme: Theme, nativeBaseTheme: any) => StyleSheet.create({
   dayText: {
     fontWeight: '500',
     fontSize: 14,
+  },
+  headerContainer: {
+    backgroundColor: theme.colors.surface,
+    paddingTop: 60,
+    paddingBottom: 20,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    marginBottom: 16,
+    elevation: 4,
+    marginHorizontal: -16, // Remove the gap at edges
+  },
+  headerContent: {
+    paddingHorizontal: 16,
+    marginBottom: 16,
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: theme.colors.primary,
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: 16,
+    color: theme.colors.onSurfaceVariant,
   },
 });
 

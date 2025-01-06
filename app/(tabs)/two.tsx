@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, StyleSheet, FlatList, ListRenderItem } from 'react-native';
-import { useTheme, Text, Searchbar, ActivityIndicator, Surface , MD3Theme as Theme} from 'react-native-paper';
+import { useTheme, Text, Searchbar, ActivityIndicator, Surface, MD3Theme as Theme } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeIn, FadeOut, Layout } from 'react-native-reanimated';
 import ExperimentCard from '@/components/ExperimentCard';
@@ -10,6 +10,7 @@ const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<Experiment>);
 
 const ExperimentList: React.FC = () => {
   const theme = useTheme();
+  
   const styles = createStyles(theme);
 
   const [isLoading, setLoading] = useState(true);
@@ -41,7 +42,7 @@ const ExperimentList: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const filtered = experiments.filter(exp => 
+    const filtered = experiments.filter(exp =>
       exp.ExpName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       exp.ExpDesc?.toLowerCase().includes(searchQuery.toLowerCase())
     );
@@ -59,7 +60,7 @@ const ExperimentList: React.FC = () => {
   ), []);
 
   const ListEmptyComponent = useCallback(() => (
-    <Animated.View 
+    <Animated.View
       style={styles.centerContainer}
       entering={FadeIn.duration(300)}
     >
@@ -73,22 +74,26 @@ const ExperimentList: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Surface style={styles.searchContainer} elevation={4}>
-        <Searchbar
-          placeholder="Search experiments..."
-          onChangeText={setSearchQuery}
-          value={searchQuery}
-          style={styles.searchBar}
-          inputStyle={styles.searchInput}
-          icon={() => <Ionicons name="search" size={20} color={theme.colors.primary} />}
-          clearIcon={() => 
-            searchQuery ? 
-            <Ionicons name="close-circle" size={20} color={theme.colors.primary} /> 
-            : undefined
-          }
-        />
+      <Surface style={styles.headerContainer} elevation={4}>
+        <View style={styles.headerContent}>
+          <Text style={styles.headerTitle}>Lab Experiments</Text>
+          <Text style={styles.headerSubtitle}>CSE-DS 5th Semester</Text>
+          <Searchbar
+            placeholder="Search experiments..."
+            onChangeText={setSearchQuery}
+            value={searchQuery}
+            style={styles.searchBar}
+            inputStyle={styles.searchInput}
+            icon={() => <Ionicons name="search" size={20} color={theme.colors.primary} />}
+            clearIcon={() =>
+              searchQuery ?
+                <Ionicons name="close-circle" size={20} color={theme.colors.primary} />
+                : undefined
+            }
+          />
+        </View>
       </Surface>
-      
+
       {isLoading ? (
         <View style={styles.centerContainer}>
           <ActivityIndicator size={32} color={theme.colors.primary} />
@@ -119,22 +124,40 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  searchContainer: {
+  headerContainer: {
     backgroundColor: theme.colors.surface,
-    paddingVertical: 12,
+    paddingTop: 60,
+    paddingBottom: 20,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    marginBottom: 16,
+    elevation: 4,
+  },
+  headerContent: {
     paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.surfaceVariant,
-    zIndex: 1,
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: theme.colors.primary,
+    marginBottom: 4,
+    fontFamily: 'Poppins_700Bold',
+  },
+  headerSubtitle: {
+    fontSize: 16,
+    color: theme.colors.onSurfaceVariant,
+    marginBottom: 16,
+    fontFamily: 'Poppins_400Regular',
   },
   searchBar: {
     elevation: 0,
-    borderRadius: 24,
+    borderRadius: 12,
     backgroundColor: theme.colors.surfaceVariant,
   },
   searchInput: {
     fontSize: 16,
-    color: theme.colors.onSurface,
+    color: 'white',
+    fontFamily: 'Poppins_400Regular',
   },
   listContent: {
     paddingHorizontal: 16,
@@ -152,17 +175,20 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     marginTop: 12,
     color: theme.colors.primary,
     fontSize: 16,
+    fontFamily: 'Poppins_400Regular',
   },
   emptyStateTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: theme.colors.onSurface,
+    color: 'white',
+    fontFamily: 'Poppins_600SemiBold',
   },
   emptyStateSubtitle: {
     fontSize: 14,
-    color: theme.colors.onSurfaceVariant,
+    color: 'white',
     textAlign: 'center',
     marginTop: 4,
+    fontFamily: 'Poppins_400Regular',
   },
   separator: {
     height: 16,

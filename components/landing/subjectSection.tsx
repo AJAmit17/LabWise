@@ -10,6 +10,26 @@ const currentSubjects = [
 export default function SubjectsSection() {
   const theme = useTheme();
 
+  const styles = StyleSheet.create({
+    container: {
+      marginBottom: 20,
+    },
+    sectionTitle: {
+      fontSize: 24,
+      fontFamily: 'Poppins_600SemiBold',
+      marginBottom: 10,
+      color: theme.colors.onBackground,
+    },
+    subjectsContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+    },
+    subjectChip: {
+      margin: 4,
+      backgroundColor: theme.colors.secondaryContainer,
+    },
+  });
+
   return (
     <View style={styles.container}>
       <Title style={styles.sectionTitle}>Current Subjects</Title>
@@ -18,8 +38,9 @@ export default function SubjectsSection() {
           <Chip
             key={index}
             style={styles.subjectChip}
+            textStyle={{ color: theme.colors.onSecondaryContainer }}
             icon="book-open-variant"
-            mode="outlined"
+            mode="flat"
           >
             {subject}
           </Chip>
@@ -28,22 +49,4 @@ export default function SubjectsSection() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontFamily: 'Poppins_600SemiBold',
-    marginBottom: 10,
-  },
-  subjectsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  subjectChip: {
-    margin: 4,
-  },
-});
 

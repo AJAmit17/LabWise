@@ -12,11 +12,6 @@ const features = [
         description: "Access all lab manuals and procedures"
     },
     {
-        icon: "notebook",
-        text: "Lab Solutions",
-        description: "Step-by-step solutions and explanations"
-    },
-    {
         icon: "file-document",
         text: "Resources",
         description: "Additional study materials and references"
@@ -36,6 +31,44 @@ const features = [
 export default function FeaturesSection() {
     const theme = useTheme();
 
+    const styles = StyleSheet.create({
+        container: {
+            marginBottom: 20,
+        },
+        sectionTitle: {
+            fontSize: 24,
+            fontFamily: 'Poppins_600SemiBold',
+            marginBottom: 10,
+            color: theme.colors.onBackground,
+        },
+        featuresContainer: {
+            gap: 12,
+        },
+        featureCard: {
+            borderRadius: 12,
+            backgroundColor: theme.colors.surface,
+        },
+        featureContent: {
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        featureTextContainer: {
+            marginLeft: 16,
+            flex: 1,
+        },
+        featureTitle: {
+            fontSize: 18,
+            fontFamily: 'Poppins_600SemiBold',
+            marginBottom: 4,
+            color: theme.colors.onSurface,
+        },
+        featureDescription: {
+            fontSize: 14,
+            fontFamily: 'Poppins_400Regular',
+            color: theme.colors.onSurfaceVariant,
+        },
+    });
+
     return (
         <View style={styles.container}>
             <Title style={styles.sectionTitle}>Quick Access</Title>
@@ -47,7 +80,7 @@ export default function FeaturesSection() {
                     >
                         <Card 
                             style={styles.featureCard} 
-                            mode="outlined"
+                            mode="elevated"
                             onPress={() => feature.text === "Attendance Tracker" ? router.push('/attendence/page') : null}
                         >
                             <Card.Content style={styles.featureContent}>
@@ -70,38 +103,4 @@ export default function FeaturesSection() {
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        marginBottom: 20,
-    },
-    sectionTitle: {
-        fontSize: 24,
-        fontFamily: 'Poppins_600SemiBold',
-        marginBottom: 10,
-    },
-    featuresContainer: {
-        gap: 12,
-    },
-    featureCard: {
-        borderRadius: 12,
-    },
-    featureContent: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    featureTextContainer: {
-        marginLeft: 16,
-        flex: 1,
-    },
-    featureTitle: {
-        fontSize: 18,
-        fontFamily: 'Poppins_600SemiBold',
-        marginBottom: 4,
-    },
-    featureDescription: {
-        fontSize: 14,
-        fontFamily: 'Poppins_400Regular',
-    },
-});
 

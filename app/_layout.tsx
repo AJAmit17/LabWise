@@ -6,9 +6,10 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { View, ActivityIndicator, useColorScheme } from 'react-native';
-import { Provider as PaperProvider, MD3DarkTheme, MD3LightTheme } from 'react-native-paper';
+import { Provider as PaperProvider } from 'react-native-paper';
 import * as SecureStore from 'expo-secure-store';
 import { en, registerTranslation } from 'react-native-paper-dates';
+import { darkTheme, lightTheme } from '@/theme';
 
 registerTranslation('en', en);
 
@@ -39,7 +40,6 @@ function LoadingScreen() {
     </View>
   );
 }
-
 function InitialLayout() {
   const { isLoaded, isSignedIn } = useAuth();
   const segments = useSegments();
@@ -47,7 +47,7 @@ function InitialLayout() {
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
 
-  const theme = isDarkMode ? MD3DarkTheme : MD3LightTheme;
+  const theme = isDarkMode ? darkTheme : lightTheme;
   const navigationTheme = isDarkMode ? DarkTheme : DefaultTheme;
 
   useEffect(() => {
@@ -65,7 +65,10 @@ function InitialLayout() {
   if (!isLoaded) return <LoadingScreen />;
 
   return (
-    <PaperProvider theme={theme}>
+    <PaperProvider
+      //@ts-ignore
+      theme={theme}
+    >
       <ThemeProvider value={navigationTheme}>
         <Stack
           screenOptions={{
@@ -93,7 +96,6 @@ function InitialLayout() {
           <Stack.Screen
             name="attendence/page"
             options={{
-              headerShown: true,
               headerTitle: 'Attendance Dashboard',
               animation: 'slide_from_right',
             }}
@@ -108,7 +110,7 @@ function InitialLayout() {
             }}
           />
           <Stack.Screen
-            name="attendence/calender/page"
+            name="attendence/calendar/page"
             options={{
               headerShown: true,
               headerTitle: 'Calendar View',
@@ -152,7 +154,7 @@ export default function RootLayout() {
   if (!loaded) return <LoadingScreen />;
 
   return (
-    <ClerkProvider publishableKey={"pk_test_Y2hvaWNlLXNxdWlkLTUuY2xlcmsuYWNjb3VudHMuZGV2JA"} tokenCache={tokenCache}>
+    <ClerkProvider publishableKey={process.env.CLERK_PUBLISHABLE_KEY!} tokenCache={tokenCache}>
       <ClerkLoaded>
         <InitialLayout />
       </ClerkLoaded>
