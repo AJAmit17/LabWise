@@ -1,115 +1,165 @@
-# LabWise - Academic Lab Management System 📱
+# LabWise - Academic Lab & Attendance Management System 📱
 
-[![Expo](https://img.shields.io/badge/Expo-v13.2.3-blue.svg)](https://expo.dev)
-[![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Web-green.svg)](https://docs.expo.dev)
+[![React Native](https://img.shields.io/badge/React%20Native-v0.76-blue.svg)](https://reactnative.dev/)
+[![Expo](https://img.shields.io/badge/Expo-SDK%2052-black.svg)](https://expo.dev)
+[![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20-green.svg)](https://docs.expo.dev)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-## Project Overview
+## Overview 🎯
 
-LabWise is a comprehensive mobile application designed to streamline laboratory management for academic institutions. Built using React Native and Expo, it provides a unified platform for students and faculty to access lab materials, schedules, and resources.
+LabWise is a comprehensive mobile application designed for academic institutions, focusing on lab management, attendance tracking, and academic resource organization. Built with React Native and Expo, it provides a seamless cross-platform experience for students and faculty.
 
-## Project Objectives
+## Key Features 🌟
 
-- Simplify access to lab manuals and procedures
-- Provide organized storage of lab solutions and materials
-- Enable easy navigation through course schedules
-- Create a seamless cross-platform experience
+### 1. Attendance Management
+- Digital attendance tracking for each class
+- Support for regular and extra classes
+- Visual attendance statistics and analytics
+- Automatic percentage calculations
+- Export functionality for attendance data
+- Smart predictions for maintaining target attendance
 
-## Technology Stack
+### 2. Course Management
+- Easy course registration with schedule setup
+- Flexible time slot management
+- Multiple section support (A & B sections)
+- Course-wise attendance tracking
+- Customizable minimum attendance targets
 
-- **Frontend Framework**: React Native with Expo
-- **UI Components**: React Native Paper
-- **Navigation**: Expo Router
-- **Icons**: Material Icons & SF Symbols
-- **State Management**: React Hooks
-- **Build System**: EAS (Expo Application Services)
+### 3. Time Table
+- Interactive weekly schedule viewer
+- Section-wise timetable display
+- Detailed class information including:
+  - Subject name and code
+  - Professor details
+  - Time slots
+  - Room information
 
-## Core Features
-
-### 1. Lab Management
+### 4. Lab Resources
 - Digital lab manual access
-- Step-by-step experiment guides
-- Integrated solutions repository
-- Resource documentation
+- Secure file storage and sharing
+- Support for multiple file formats
+- Search functionality
+- Download tracking
+- Integration with Pinata IPFS
 
-### 2. Academic Tools
-- Interactive timetable viewer
-- Course material organization
-- Subject-wise categorization
-- Quick reference guides
-
-### 3. User Interface
-- Modern, intuitive design
-- Cross-platform consistency
-- Dark/Light mode support
+### 5. User Interface
+- Modern Material Design implementation
+- Dark/Light theme support
 - Responsive layouts
+- Intuitive navigation
+- Interactive statistics visualization
 
-### 4. Technical Implementation
+## Technical Implementation 🛠️
 
-#### Routing System
-- File-based routing using Expo Router
-- Deep linking support
-- Tab-based navigation
-- Stack navigation for detailed views
+### Frontend Architecture
+- **UI Framework**: React Native Paper
+- **Navigation**: Expo Router with deep linking
+- **State Management**: React Hooks & Context API
+- **Storage**: AsyncStorage for persistent data
+- **File Handling**: Expo FileSystem & Sharing
 
-#### Data Management
-- Efficient state management
-- Async storage implementation
-- Secure data handling
-- Optimized content delivery
+### Key Components
+1. **Attendance Tracker**
+   - Calendar integration
+   - Status tracking (Present/Absent/No Class)
+   - Extra class management
+   - Statistical analysis
 
-## Project Structure
+2. **Course Manager**
+   - Schedule configuration
+   - Time slot management
+   - Section handling
+   - Attendance rules
 
-## 📋 Prerequisites
+3. **Resource Manager**
+   - IPFS integration via Pinata
+   - File type handling
+   - Search functionality
+   - Download management
 
-- Node.js (v14 or higher)
+## Getting Started 🚀
+
+### Prerequisites
+- Node.js (v16 or higher)
 - npm or yarn
 - Expo CLI
-- iOS Simulator (for iOS development)
 - Android Studio (for Android development)
+- Xcode (for iOS development, macOS only)
 
-## 🛠 Installation
+### Installation
 
 1. Clone the repository
-   ```bash
-   git clone https://github.com/AJAmit17/LabWise.git
-   cd LabWise
-   ```
+```bash
+git clone https://github.com/AJAmit17/LabWise.git
+cd LabWise
+```
 
 2. Install dependencies
-   ```bash
-   npm install
-   ```
+```bash
+npm install
+```
 
-3. Start the development server
-   ```bash
-   npx expo start
-   ```
+3. Create environment variables
+```bash
+# Create .env file with:
+CLERK_PUBLISHER_KEY = "pk_key..."
+PINATA_JWT=your_pinata_jwt_token
+```
 
-## 🏗 Development
+4. Start the development server
+```bash
+npx expo start
+```
+
+### Running the App
+
+Choose your preferred method:
+- Scan QR code with Expo Go app
+- Press 'a' for Android emulator
+- Press 'i' for iOS simulator
+- Press 'w' for web browser
+
+## Development 👨‍💻
+
+### Project Structure
+```
+LabWise/
+├── app/
+│   ├── (tabs)/
+│   │   ├── two.tsx        # Lab Experiments
+│   │   ├── three.tsx      # Time Table
+│   │   └── four.tsx       # Resources
+│   └── attendance/
+│       ├── addCourse/     # Course Management
+│       ├── calendar/      # Attendance Tracking
+│       ├── listCourse/    # Course List
+│       └── stats/         # Attendance Statistics
+├── components/
+├── types/
+└── assets/
+```
 
 ### Available Scripts
+- `npx expo start`: Start development server
+- `npx expo build:android`: Build Android app
+- `npx expo build:ios`: Build iOS app
+- `npm run test`: Run tests
 
-- `npx expo start` - Start the development server
-- `npm run reset-project` - Reset the project to a fresh state
-- `eas build` - Build the application using EAS
+## Contributing 🤝
 
-### Environment Setup
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-The project uses different configurations for various environments:
+## License 📄
 
-- Development: Uses development client with internal distribution
-- Preview: Internal distribution build
-- Production: Automated versioning with auto-increment
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 📱 Running the App
+## Acknowledgments 🙏
 
-You can run the app in multiple ways:
-- Using Expo Go
-- On iOS Simulator
-- On Android Emulator
-- Through development builds
-
-## 🚀 Deployment
-
-This project uses EAS (Expo Application Services) for building and deployment. Configure your builds in `eas.json`:
+- React Native Paper for UI components
+- Expo team for the development tools
+- Pinata for IPFS storage solutions
