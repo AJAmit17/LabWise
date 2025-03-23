@@ -1,14 +1,10 @@
 import { PaperProvider } from 'react-native-paper';
 import { Tabs } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useColorScheme } from 'react-native';
-import { useState } from 'react';
-import { lightTheme, darkTheme } from '@/theme';
+import { useThemeContext } from '@/context/ThemeContext';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-  const [isDarkTheme] = useState(colorScheme === 'dark');
-  const theme = isDarkTheme ? darkTheme : lightTheme;
+  const { theme } = useThemeContext();
 
   return (
     <PaperProvider
@@ -22,13 +18,19 @@ export default function TabLayout() {
           tabBarStyle: {
             backgroundColor: theme.colors.surface,
             height: 80,
-            paddingBottom: 12,
             paddingTop: 12,
+            paddingBottom: 0,
             shadowColor: theme.colors.onSurface,
             shadowOffset: { width: 0, height: -4 },
             shadowOpacity: 0.1,
             shadowRadius: 4,
             elevation: 8,
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            borderTopWidth: 1,
+            borderTopColor: theme.colors.outline + '30',
           },
           headerStyle: {
             backgroundColor: theme.colors.surface,
@@ -51,16 +53,6 @@ export default function TabLayout() {
           },
         }}
       >
-        {/* <Tabs.Screen
-          name="index"
-          options={{
-            headerShown: false,
-            tabBarIcon: ({ color, focused }) => (
-              <Ionicons name={focused ? "home" : "home-outline"} size={24} color={color} />
-            ),
-            tabBarLabel: 'Home',
-          }}
-        /> */}
         <Tabs.Screen
           name="index"
           options={{
@@ -71,7 +63,7 @@ export default function TabLayout() {
             headerShown: false,
           }}
         />
-        {/* <Tabs.Screen
+        <Tabs.Screen
           name="two"
           options={{
             title: "Experiments",
@@ -83,7 +75,7 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="four"
+          name="three"
           options={{
             title: "Resources",
             tabBarIcon: ({ color, size }) => (
@@ -93,7 +85,7 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="three"
+          name="four"
           options={{
             title: "Time Table",
             headerTitle: "CSE-DS Class Time Table",
@@ -102,7 +94,7 @@ export default function TabLayout() {
             ),
             headerShown: false,
           }}
-        /> */}
+        />
       </Tabs>
     </PaperProvider>
   );

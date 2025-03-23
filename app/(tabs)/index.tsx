@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, ScrollView, StyleSheet, RefreshControl } from 'react-native';
+import { View, ScrollView, StyleSheet, RefreshControl, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   Card,
@@ -11,12 +11,15 @@ import {
   useTheme,
   Divider,
   Chip,
+  IconButton,
+  Surface,
 } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Course, AttendanceRecord } from '@/types';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useThemeContext } from '@/context/ThemeContext';
 
 interface StatusIconMap {
   present: string;
@@ -34,6 +37,35 @@ interface QuickActionButtonProps {
 function getDayName(dateString) {
   const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   return days[new Date(dateString).getDay()];
+}
+
+function ThemeToggle() {
+  const { isDarkMode, toggleTheme } = useThemeContext();
+
+  return (
+    <Surface
+      style={{
+        position: 'absolute',
+        right: 16,
+        top: 48,
+        zIndex: 1000,
+        borderRadius: 20,
+        elevation: 4,
+        opacity: 0.9,
+        overflow: 'hidden',
+        marginRight: 8,
+      }}
+    >
+      <IconButton
+        icon={isDarkMode ? "white-balance-sunny" : "moon-waning-crescent"}
+        size={24}
+        onPress={toggleTheme}
+        mode="contained"
+        containerColor={isDarkMode ? "#1E2433" : "#FFFFFF"}
+        iconColor={isDarkMode ? "#F5F5F5" : "#3949AB"}
+      />
+    </Surface>
+  );
 }
 
 export default function HomePage() {
@@ -64,10 +96,24 @@ export default function HomePage() {
     const newAttendance = {
       ...attendance,
       [today]: {
-        ...(attendance[today] || {}),
-        [courseId]: status
+        ...(attendance[today] || {})
       }
     };
+
+    // Toggle logic - if the same status is clicked again, remove the attendance record
+    if (attendance[today]?.[courseId] === status) {
+      // Deselect/reset the attendance status
+      delete newAttendance[today][courseId];
+
+      // Clean up empty date entries
+      if (Object.keys(newAttendance[today]).length === 0) {
+        delete newAttendance[today];
+      }
+    } else {
+      // Set the new status
+      newAttendance[today][courseId] = status;
+    }
+
     await AsyncStorage.setItem('attendance', JSON.stringify(newAttendance));
     setAttendance(newAttendance);
   };
@@ -138,11 +184,15 @@ export default function HomePage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'present': return { bg: '#E8F5E9', text: '#2E7D32' };
-      case 'absent': return { bg: '#FFEBEE', text: '#C62828' };
-      case 'noclass': return { bg: '#E3F2FD', text: '#1565C0' };
-      default: return { bg: '#F5F5F5', text: '#424242' };
+      case 'present': return { bg: '#E8F5E9', text: '#2E7D32', selectedBg: '#81C784', border: '#2E7D32' };
+      case 'absent': return { bg: '#FFEBEE', text: '#C62828', selectedBg: '#EF5350', border: '#C62828', selectedText: '#FFFFFF' };
+      case 'noclass': return { bg: '#E3F2FD', text: '#1565C0', selectedBg: '#64B5F6', border: '#1565C0' };
+      default: return { bg: '#F5F5F5', text: '#424242', selectedBg: '#BDBDBD', border: '#424242' };
     }
+  };
+
+  const handleAmitLinkPress = () => {
+    Linking.openURL('https://amit-acharya.live');
   };
 
   return (
@@ -243,28 +293,35 @@ export default function HomePage() {
                   </View>
                   <Divider style={styles.divider} />
                   <View style={styles.attendanceButtons}>
-                    {['present', 'absent', 'noclass'].map((status) => (
-                      <Chip
-                        key={status}
-                        selected={attendance[today]?.[schedule.slotId] === status}
-                        onPress={() => saveAttendance(schedule.slotId, status)}
-                        style={[
-                          styles.statusChip,
-                          {
-                            backgroundColor: attendance[today]?.[schedule.slotId] === status
-                              ? getStatusColor(status).bg
-                              : 'transparent'
-                          }
-                        ]}
-                        textStyle={{
-                          color: attendance[today]?.[schedule.slotId] === status
-                            ? getStatusColor(status).text
-                            : '#666'
-                        }}
-                      >
-                        {status.charAt(0).toUpperCase() + status.slice(1)}
-                      </Chip>
-                    ))}
+                    {['present', 'absent', 'noclass'].map((status) => {
+                      const isSelected = attendance[today]?.[schedule.slotId] === status;
+                      const colors = getStatusColor(status);
+                      return (
+                        <Chip
+                          key={status}
+                          selected={isSelected}
+                          onPress={() => saveAttendance(schedule.slotId, status)}
+                          style={[
+                            styles.statusChip,
+                            {
+                              backgroundColor: isSelected ? colors.selectedBg : colors.bg,
+                              borderWidth: 1,
+                              borderColor: isSelected ? colors.border : '#CCCCCC',
+                              elevation: isSelected ? 2 : 0
+                            }
+                          ]}
+                          textStyle={{
+                            color: (isSelected && status === 'absent' && colors.selectedText) ? 
+                              colors.selectedText : (isSelected ? colors.text : '#666'),
+                            fontWeight: isSelected ? 'bold' : 'normal'
+                          }}
+                          icon={isSelected ? 'check' : undefined}
+                          mode={isSelected ? 'flat' : 'outlined'}
+                        >
+                          {status.charAt(0).toUpperCase() + status.slice(1)}
+                        </Chip>
+                      );
+                    })}
                   </View>
                 </Card.Content>
               </Card>
@@ -274,7 +331,7 @@ export default function HomePage() {
           <Text variant="titleLarge" style={[styles.sectionTitle, { color: theme.colors.onBackground }]}>
             Quick Actions
           </Text>
-          {/* <View style={styles.quickActions}>
+          <View style={styles.quickActions}>
             <QuickActionButton
               icon="calendar-month"
               label="Calendar"
@@ -290,15 +347,30 @@ export default function HomePage() {
               label="Courses"
               onPress={() => router.push('/attendence/listCourse/page')}
             />
-          </View> */}
+          </View>
 
           <View style={[styles.footer, { backgroundColor: 'transparent' }]}>
             <Text style={[styles.footerText, { color: theme.colors.onSurfaceVariant }]}>
-              Made with <MaterialCommunityIcons name="heart" size={16} color="#F44336" /> by Amit
+              Made with <MaterialCommunityIcons name="heart" size={16} color="#F44336" /> by{' '}
+              <Text
+                style={[styles.footerLink, { 
+                  color: theme.colors.primary,
+                  fontWeight: 'bold',
+                  letterSpacing: 0.5,
+                  borderBottomWidth: 1,
+                  borderBottomColor: theme.colors.primary,
+                }]}
+                onPress={handleAmitLinkPress}
+              >
+                Amit
+              </Text>
             </Text>
           </View>
         </View>
       </ScrollView>
+
+      {/* Add ThemeToggle component here */}
+      <ThemeToggle />
 
       <Portal>
         <Dialog visible={showDialog} onDismiss={() => setShowDialog(false)}>
@@ -355,7 +427,7 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 28,
     fontWeight: 'bold',
-    textAlign: 'center',
+    textAlign: 'left'
   },
   taglineText: {
     color: 'white',
@@ -467,6 +539,9 @@ const styles = StyleSheet.create({
   statusChip: {
     borderRadius: 12,
     borderWidth: 1,
+    height: 36,
+    justifyContent: 'center',
+    flex: 1,
   },
   quickActions: {
     flexDirection: 'row',
@@ -497,5 +572,11 @@ const styles = StyleSheet.create({
   footerText: {
     fontSize: 14,
     fontWeight: '500',
+  },
+  footerLink: {
+    textDecorationLine: 'none',
+    fontWeight: '700',
+    fontSize: 16,
+    paddingHorizontal: 4,
   },
 });

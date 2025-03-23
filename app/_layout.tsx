@@ -1,23 +1,17 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { View, ActivityIndicator, useColorScheme } from 'react-native';
+import { View, ActivityIndicator } from 'react-native';
 import { Provider as PaperProvider } from 'react-native-paper';
-// import { en, registerTranslation } from 'react-native-paper-dates';
-import { darkTheme, lightTheme } from '@/theme';
-
-// registerTranslation('en', en);
+import { ThemeProvider, useThemeContext } from '@/context/ThemeContext';
 
 function LoadingScreen() {
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme === 'dark';
-
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <ActivityIndicator size="large" color={isDarkMode ? "#bb86fc" : "#6200ee"} />
+      <ActivityIndicator size="large" color="#6200ee" />
     </View>
   );
 }
@@ -25,10 +19,7 @@ function LoadingScreen() {
 function InitialLayout() {
   const segments = useSegments();
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme === 'dark';
-
-  const theme = isDarkMode ? darkTheme : lightTheme;
+  const { theme, isDarkMode } = useThemeContext();
   const navigationTheme = isDarkMode ? DarkTheme : DefaultTheme;
 
   useEffect(() => {
@@ -44,7 +35,7 @@ function InitialLayout() {
       //@ts-ignore
       theme={theme}
     >
-      <ThemeProvider value={navigationTheme}>
+      <NavigationThemeProvider value={navigationTheme}>
         <Stack
           screenOptions={{
             headerShown: false,
@@ -59,22 +50,15 @@ function InitialLayout() {
           }}
         >
           <Stack.Screen name="(tabs)" />
-          {/* <Stack.Screen
+          <Stack.Screen
             name="experiment/[id]"
             options={{
-              presentation: 'modal',
+              animation: 'fade_from_bottom',
               headerShown: true,
               headerTitle: 'Experiment Details',
             }}
-          /> */}
-          {/* <Stack.Screen
-            name="attendence/page"
-            options={{
-              headerTitle: 'Attendance Dashboard',
-              animation: 'slide_from_right',
-            }}
-          /> */}
-          {/* <Stack.Screen
+          />
+          <Stack.Screen
             name="attendence/addCourse/page"
             options={{
               headerShown: true,
@@ -106,10 +90,10 @@ function InitialLayout() {
               headerTitle: 'Manage Courses',
               animation: 'slide_from_right',
             }}
-          /> */}
+          />
         </Stack>
         <StatusBar style={isDarkMode ? 'light' : 'dark'} />
-      </ThemeProvider>
+      </NavigationThemeProvider>
     </PaperProvider>
   );
 }
@@ -127,5 +111,9 @@ export default function RootLayout() {
 
   if (!loaded) return <LoadingScreen />;
 
-  return <InitialLayout />;
+  return (
+    <ThemeProvider>
+      <InitialLayout />
+    </ThemeProvider>
+  );
 }
