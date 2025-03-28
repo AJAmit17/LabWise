@@ -550,7 +550,7 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     listContent: {
         paddingHorizontal: 16,
         paddingTop: 8,
-        paddingBottom: 24,
+        paddingBottom: 100,
     },
     centerContainer: {
         flex: 1,

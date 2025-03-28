@@ -72,7 +72,7 @@ function InitialLayout() {
             options={{
               headerShown: true,
               headerTitle: 'Calendar View',
-              animation: 'fade_from_bottom',
+              animation: 'slide_from_left',
             }}
           />
           <Stack.Screen
@@ -80,7 +80,7 @@ function InitialLayout() {
             options={{
               headerShown: true,
               headerTitle: 'Statistics',
-              animation: 'fade',
+              animation: 'fade_from_bottom',
             }}
           />
           <Stack.Screen

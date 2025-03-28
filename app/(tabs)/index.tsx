@@ -72,7 +72,7 @@ export default function HomePage() {
   const theme = useTheme();
   const [courses, setCourses] = useState<Course[]>([]);
   const [attendance, setAttendance] = useState<AttendanceRecord>({});
-  const [showDialog, setShowDialog] = useState(false);
+  // const [showDialog, setShowDialog] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
   const today = new Date().toISOString().split('T')[0];
@@ -311,7 +311,7 @@ export default function HomePage() {
                             }
                           ]}
                           textStyle={{
-                            color: (isSelected && status === 'absent' && colors.selectedText) ? 
+                            color: (isSelected && status === 'absent' && colors.selectedText) ?
                               colors.selectedText : (isSelected ? colors.text : '#666'),
                             fontWeight: isSelected ? 'bold' : 'normal'
                           }}
@@ -353,17 +353,21 @@ export default function HomePage() {
             <Text style={[styles.footerText, { color: theme.colors.onSurfaceVariant }]}>
               Made with <MaterialCommunityIcons name="heart" size={16} color="#F44336" /> by{' '}
               <Text
-                style={[styles.footerLink, { 
+                style={[styles.footerLink, {
                   color: theme.colors.primary,
                   fontWeight: 'bold',
                   letterSpacing: 0.5,
                   borderBottomWidth: 1,
                   borderBottomColor: theme.colors.primary,
+                  textDecorationLine: 'underline', // Add this line
                 }]}
                 onPress={handleAmitLinkPress}
               >
                 Amit
               </Text>
+            </Text>
+            <Text style={[styles.issuesText, { color: theme.colors.onSurfaceVariant, marginTop: 4 }]}>
+              Issues or feature requests? Email <Text style={{ fontWeight: 'bold' }}>amit.acharya.work@gmail.com</Text>
             </Text>
           </View>
         </View>
@@ -372,7 +376,7 @@ export default function HomePage() {
       {/* Add ThemeToggle component here */}
       <ThemeToggle />
 
-      <Portal>
+      {/* <Portal>
         <Dialog visible={showDialog} onDismiss={() => setShowDialog(false)}>
           <Dialog.Title>Course Information</Dialog.Title>
           <Dialog.Content>
@@ -386,7 +390,7 @@ export default function HomePage() {
             </Button>
           </Dialog.Actions>
         </Dialog>
-      </Portal>
+      </Portal> */}
     </View>
   );
 }
@@ -409,6 +413,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
+    paddingBottom: 80, // Add bottom padding to account for tab bar
   },
   gradientHeader: {
     width: '100%',
@@ -547,7 +552,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 12,
-    marginBottom: 24, // Reduced from 80 since footer is now inside scroll
+    marginBottom: 24,
   },
   actionCard: {
     flex: 1,
@@ -572,6 +577,10 @@ const styles = StyleSheet.create({
   footerText: {
     fontSize: 14,
     fontWeight: '500',
+  },
+  issuesText: {
+    fontSize: 12,
+    textAlign: 'center',
   },
   footerLink: {
     textDecorationLine: 'none',

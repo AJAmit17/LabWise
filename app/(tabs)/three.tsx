@@ -3,7 +3,6 @@ import { View, StyleSheet, FlatList, ListRenderItem, TouchableOpacity, Modal, Sc
 import { useTheme, Text, Searchbar, ActivityIndicator, Surface, Chip, MD3Theme as Theme, Button, Card, Divider, RadioButton } from 'react-native-paper';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import Animated, { FadeIn, FadeOut, Layout } from 'react-native-reanimated';
-import { useRouter } from 'expo-router';
 
 interface Resource {
     id: string;
@@ -15,13 +14,13 @@ interface Resource {
     academicYear: string;
     professorName: string;
     cid: string | null;
+    externalLinks: string[];
 }
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<Resource>);
 
 const ResourcesScreen: React.FC = () => {
     const theme = useTheme();
-    const router = useRouter();
     const styles = createStyles(theme);
 
     const [resources, setResources] = useState<Resource[]>([]);
@@ -230,6 +229,33 @@ const ResourcesScreen: React.FC = () => {
                             </Chip>
                         )}
                     </View>
+
+                    {item.externalLinks && item.externalLinks.length > 0 && (
+                        <>
+                            <Divider style={styles.divider} />
+                            <View style={styles.externalLinksContainer}>
+                                <Text style={styles.externalLinksTitle}>External Links:</Text>
+                                <View style={styles.externalLinksList}>
+                                    {item.externalLinks.map((link, index) => (
+                                        <TouchableOpacity
+                                            key={index}
+                                            style={styles.externalLinkItem}
+                                            onPress={() => Linking.openURL(link)}
+                                        >
+                                            <MaterialCommunityIcons name="link-variant" size={18} color={theme.colors.primary} />
+                                            <Text
+                                                style={styles.externalLinkText}
+                                                numberOfLines={1}
+                                                ellipsizeMode="middle"
+                                            >
+                                                {link}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </View>
+                            </View>
+                        </>
+                    )}
                 </Card.Content>
                 <Card.Actions>
                     <Button
@@ -583,6 +609,7 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: theme.colors.background,
+        paddingBottom : 100,
     },
     headerContainer: {
         backgroundColor: theme.colors.surface,
@@ -817,6 +844,31 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     filterButton: {
         flex: 1,
         marginHorizontal: 8,
+    },
+    externalLinksContainer: {
+        marginTop: 4,
+    },
+    externalLinksTitle: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: theme.colors.onSurface,
+        marginBottom: 8,
+    },
+    externalLinksList: {
+        marginLeft: 4,
+    },
+    externalLinkItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 8,
+        paddingVertical: 4,
+    },
+    externalLinkText: {
+        marginLeft: 8,
+        fontSize: 14,
+        color: theme.colors.primary,
+        textDecorationLine: 'underline',
+        flex: 1,
     },
 });
 
