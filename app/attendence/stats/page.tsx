@@ -359,7 +359,7 @@ export default function StatsPage() {
                                     </Text>
 
                                     {requiredClasses > 0 ? (
-                                        <Text style={[styles.warningText, { color: status.color }]}>
+                                        <Text style={[styles.warningText, { color: theme.colors.error }]}>
                                             Need {requiredClasses} more classes to reach {minimumAttendance}%
                                         </Text>
                                     ) : (
