@@ -1,7 +1,7 @@
 # LabWise
 
 <p align="center">
-  <img src="assets/labwise-logo.png" alt="LabWise Logo" width="200"/>
+  <img src="assets/images/icon.png" alt="LabWise Logo" width="200"/>
 </p>
 
 ## A Comprehensive Lab Management & Attendance Tracking App for NHCE Students
