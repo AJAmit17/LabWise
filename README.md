@@ -219,3 +219,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 <p align="center">
   Made with ❤️ for NHCE Students
 </p>
+
+<!-- GitAds-Verify: 8OT2B6W2P9OBVCT83LYR9X3BA3PKF28U -->
