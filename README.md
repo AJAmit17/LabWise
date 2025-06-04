@@ -215,6 +215,9 @@ For issues or feature requests, please email: amit.acharya.work@gmail.com
 This project is licensed under the MIT License - see the LICENSE file for details.
 
 ---
+## GitAds Sponsored
+[![Sponsored by GitAds](https://gitads.dev/v1/ad-serve?source=ajamit17/labwise@github)](https://gitads.dev/v1/ad-track?source=ajamit17/labwise@github)
+---
 
 <p align="center">
   Made with ❤️ for NHCE Students
